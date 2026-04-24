@@ -1,3 +1,4 @@
+import Owlmetry
 import SwiftUI
 
 struct CodeStepView: View {
@@ -28,6 +29,7 @@ struct CodeStepView: View {
         isCodeFocused = true
       }
     }
+    .owlScreen("SignInCode")
   }
 
   private var header: some View {

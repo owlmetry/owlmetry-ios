@@ -1,5 +1,6 @@
 import Combine
 import Foundation
+import Owlmetry
 
 @MainActor
 final class FunnelDetailViewModel: ObservableObject {
@@ -23,8 +24,10 @@ final class FunnelDetailViewModel: ObservableObject {
       )
     } catch let error as APIError {
       errorMessage = error.errorDescription
+      Owl.error("funnel.detail.load.failed", attributes: ["error": "\(error)", "slug": slug])
     } catch {
       errorMessage = error.localizedDescription
+      Owl.error("funnel.detail.load.failed", attributes: ["error": "\(error)", "slug": slug])
     }
   }
 }

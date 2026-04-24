@@ -1,3 +1,4 @@
+import Owlmetry
 import SwiftUI
 
 struct MetricsListView: View {
@@ -19,6 +20,7 @@ struct MetricsListView: View {
       .task(id: appState.selectedProjectId) {
         await viewModel.load(projectId: appState.selectedProjectId)
       }
+      .owlScreen("MetricsList")
   }
 
   @ViewBuilder

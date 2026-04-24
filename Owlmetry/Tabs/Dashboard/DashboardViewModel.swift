@@ -1,5 +1,6 @@
 import Combine
 import Foundation
+import Owlmetry
 
 @MainActor
 final class DashboardViewModel: ObservableObject {
@@ -70,12 +71,18 @@ final class DashboardViewModel: ObservableObject {
       )
       return dto.issues.filter { IssueStatus.openStatuses.contains($0.status) }.count
     } catch {
+      Owl.error("dashboard.load.failed", attributes: ["kind": "issues", "error": "\(error)"])
       return nil
     }
   }
 
   private func fetchEventsCount(teamId: String, projectId: String?, since: String, dataMode: DataMode) async -> EventsCountResponse? {
-    try? await EventsService.count(teamId: teamId, projectId: projectId, since: since, dataMode: dataMode)
+    do {
+      return try await EventsService.count(teamId: teamId, projectId: projectId, since: since, dataMode: dataMode)
+    } catch {
+      Owl.error("dashboard.load.failed", attributes: ["kind": "events", "error": "\(error)"])
+      return nil
+    }
   }
 
   private func fetchMetricsCount(teamId: String, projectId: String?, since: String, dataMode: DataMode) async -> Int? {
@@ -83,11 +90,17 @@ final class DashboardViewModel: ObservableObject {
       let r = try await MetricsService.completionsCount(teamId: teamId, projectId: projectId, since: since, dataMode: dataMode)
       return r.count
     } catch {
+      Owl.error("dashboard.load.failed", attributes: ["kind": "metrics", "error": "\(error)"])
       return nil
     }
   }
 
   private func fetchFunnelsCount(teamId: String, projectId: String?, since: String, dataMode: DataMode) async -> CompletionsCountResponse? {
-    try? await FunnelsService.completionsCount(teamId: teamId, projectId: projectId, since: since, dataMode: dataMode)
+    do {
+      return try await FunnelsService.completionsCount(teamId: teamId, projectId: projectId, since: since, dataMode: dataMode)
+    } catch {
+      Owl.error("dashboard.load.failed", attributes: ["kind": "funnels", "error": "\(error)"])
+      return nil
+    }
   }
 }

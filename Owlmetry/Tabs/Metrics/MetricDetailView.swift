@@ -1,3 +1,4 @@
+import Owlmetry
 import SwiftUI
 
 struct MetricDetailView: View {
@@ -31,6 +32,7 @@ struct MetricDetailView: View {
     .task(id: "\(metric.id)|\(viewModel.range.rawValue)|\(appState.dataMode.rawValue)") {
       await reload()
     }
+    .owlScreen("MetricDetail")
   }
 
   private func reload() async {

@@ -1,3 +1,4 @@
+import Owlmetry
 import SwiftUI
 
 struct DashboardView: View {
@@ -57,6 +58,7 @@ struct DashboardView: View {
     .autoRefresh(id: refreshKey, every: 30) {
       await reload()
     }
+    .owlScreen("Dashboard")
   }
 
   private var refreshKey: String {

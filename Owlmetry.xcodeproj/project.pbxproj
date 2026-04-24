@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		BEEF001122334455667788CC /* Owlmetry in Frameworks */ = {isa = PBXBuildFile; productRef = BEEF001122334455667788BB /* Owlmetry */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		9688ECC22F9B99CB00C8D00B /* Owlmetry.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Owlmetry.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -23,6 +27,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BEEF001122334455667788CC /* Owlmetry in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -48,9 +53,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		9688ECC12F9B99CB00C8D00B /* Owlmetry */ = {
+		9688ECC12F9B99CB00C8D00B /* OwlmetryApp */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 9688ECCD2F9B99CC00C8D00B /* Build configuration list for PBXNativeTarget "Owlmetry" */;
+			buildConfigurationList = 9688ECCD2F9B99CC00C8D00B /* Build configuration list for PBXNativeTarget "OwlmetryApp" */;
 			buildPhases = (
 				9688ECBE2F9B99CB00C8D00B /* Sources */,
 				9688ECBF2F9B99CB00C8D00B /* Frameworks */,
@@ -63,10 +68,11 @@
 			fileSystemSynchronizedGroups = (
 				9688ECC42F9B99CB00C8D00B /* Owlmetry */,
 			);
-			name = Owlmetry;
+			name = OwlmetryApp;
 			packageProductDependencies = (
+				BEEF001122334455667788BB /* Owlmetry */,
 			);
-			productName = Owlmetry;
+			productName = OwlmetryApp;
 			productReference = 9688ECC22F9B99CB00C8D00B /* Owlmetry.app */;
 			productType = "com.apple.product-type.application";
 		};
@@ -94,12 +100,15 @@
 			);
 			mainGroup = 9688ECB92F9B99CB00C8D00B;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				BEEF001122334455667788AA /* XCRemoteSwiftPackageReference "owlmetry-swift" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 9688ECC32F9B99CB00C8D00B /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				9688ECC12F9B99CB00C8D00B /* Owlmetry */,
+				9688ECC12F9B99CB00C8D00B /* OwlmetryApp */,
 			);
 		};
 /* End PBXProject section */
@@ -272,7 +281,8 @@
 				MACOSX_DEPLOYMENT_TARGET = 26.4;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.Owlmetry;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_MODULE_NAME = OwlmetryApp;
+				PRODUCT_NAME = Owlmetry;
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -319,7 +329,8 @@
 				MACOSX_DEPLOYMENT_TARGET = 26.4;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.Owlmetry;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_MODULE_NAME = OwlmetryApp;
+				PRODUCT_NAME = Owlmetry;
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -347,7 +358,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		9688ECCD2F9B99CC00C8D00B /* Build configuration list for PBXNativeTarget "Owlmetry" */ = {
+		9688ECCD2F9B99CC00C8D00B /* Build configuration list for PBXNativeTarget "OwlmetryApp" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				9688ECCE2F9B99CC00C8D00B /* Debug */,
@@ -357,6 +368,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		BEEF001122334455667788AA /* XCRemoteSwiftPackageReference "owlmetry-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/owlmetry/owlmetry-swift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		BEEF001122334455667788BB /* Owlmetry */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BEEF001122334455667788AA /* XCRemoteSwiftPackageReference "owlmetry-swift" */;
+			productName = Owlmetry;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 9688ECBA2F9B99CB00C8D00B /* Project object */;
 }

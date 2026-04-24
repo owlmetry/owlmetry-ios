@@ -1,3 +1,4 @@
+import Owlmetry
 import SwiftUI
 
 struct FeaturesView: View {
@@ -19,6 +20,7 @@ struct FeaturesView: View {
     .padding(.horizontal, 24)
     .padding(.top, 32)
     .padding(.bottom, 12)
+    .owlScreen("OnboardingFeatures")
   }
 
   private var header: some View {

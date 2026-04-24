@@ -1,5 +1,6 @@
 import Combine
 import Foundation
+import Owlmetry
 
 @MainActor
 final class FunnelsListViewModel: ObservableObject {
@@ -18,8 +19,10 @@ final class FunnelsListViewModel: ObservableObject {
       state = funnels.isEmpty ? .empty : .loaded(())
     } catch let error as APIError {
       state = .error(error.errorDescription ?? "Failed to load funnels")
+      Owl.error("funnels.list.failed", attributes: ["error": "\(error)"])
     } catch {
       state = .error(error.localizedDescription)
+      Owl.error("funnels.list.failed", attributes: ["error": "\(error)"])
     }
   }
 }

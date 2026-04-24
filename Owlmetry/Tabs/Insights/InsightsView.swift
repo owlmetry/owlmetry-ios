@@ -1,3 +1,4 @@
+import Owlmetry
 import SwiftUI
 
 struct InsightsView: View {
@@ -38,6 +39,7 @@ struct InsightsView: View {
     .toolbar {
       ToolbarItem(placement: .topBarTrailing) { ProjectSelectorMenu() }
     }
+    .owlScreen("Insights")
   }
 }
 

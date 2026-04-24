@@ -1,5 +1,6 @@
 import Combine
 import Foundation
+import Owlmetry
 
 @MainActor
 final class IssueDetailViewModel: ObservableObject {
@@ -25,8 +26,10 @@ final class IssueDetailViewModel: ObservableObject {
       fingerprints = detail.fingerprints
     } catch let error as APIError {
       errorMessage = error.errorDescription
+      Owl.error("issue.detail.load.failed", attributes: ["error": "\(error)", "issue_id": issueId])
     } catch {
       errorMessage = error.localizedDescription
+      Owl.error("issue.detail.load.failed", attributes: ["error": "\(error)", "issue_id": issueId])
     }
   }
 
@@ -45,8 +48,10 @@ final class IssueDetailViewModel: ObservableObject {
       comments.append(created)
     } catch let error as APIError {
       errorMessage = error.errorDescription
+      Owl.error("issue.comment.post.failed", attributes: ["error": "\(error)", "issue_id": issueId])
     } catch {
       errorMessage = error.localizedDescription
+      Owl.error("issue.comment.post.failed", attributes: ["error": "\(error)", "issue_id": issueId])
     }
   }
 
@@ -61,8 +66,10 @@ final class IssueDetailViewModel: ObservableObject {
       issue = updated
     } catch let error as APIError {
       errorMessage = error.errorDescription
+      Owl.error("issue.status.update.failed", attributes: ["error": "\(error)", "issue_id": issueId, "status": status.rawValue])
     } catch {
       errorMessage = error.localizedDescription
+      Owl.error("issue.status.update.failed", attributes: ["error": "\(error)", "issue_id": issueId, "status": status.rawValue])
     }
   }
 }

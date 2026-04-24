@@ -1,3 +1,4 @@
+import Owlmetry
 import SwiftUI
 
 struct FunnelDetailView: View {
@@ -28,6 +29,7 @@ struct FunnelDetailView: View {
     .task(id: "\(funnel.id)|\(viewModel.range.rawValue)|\(appState.dataMode.rawValue)") {
       await reload()
     }
+    .owlScreen("FunnelDetail")
   }
 
   private func reload() async {

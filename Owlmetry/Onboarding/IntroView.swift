@@ -1,3 +1,4 @@
+import Owlmetry
 import SwiftUI
 
 struct IntroView: View {
@@ -25,6 +26,7 @@ struct IntroView: View {
     .padding(.horizontal, 24)
     .padding(.top, 32)
     .padding(.bottom, 12)
+    .owlScreen("OnboardingIntro")
   }
 
   private var hero: some View {

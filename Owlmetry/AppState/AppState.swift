@@ -1,5 +1,6 @@
 import Combine
 import Foundation
+import Owlmetry
 
 @MainActor
 final class AppState: ObservableObject {
@@ -57,11 +58,13 @@ final class AppState: ObservableObject {
     } else {
       UserDefaults.standard.removeObject(forKey: key)
     }
+    Owl.info("appstate.project.switched", attributes: ["project_id": id ?? "all"])
   }
 
   func setDataMode(_ mode: DataMode) {
     dataMode = mode
     UserDefaults.standard.set(mode.rawValue, forKey: UserDefaultsKeys.dataMode)
+    Owl.info("appstate.data_mode.changed", attributes: ["mode": mode.rawValue])
   }
 
   func reset() {
@@ -96,8 +99,10 @@ final class AppState: ObservableObject {
       }
     } catch let error as APIError {
       loadError = error.errorDescription
+      Owl.error("appstate.load_projects_and_apps.failed", attributes: ["error": "\(error)"])
     } catch {
       loadError = error.localizedDescription
+      Owl.error("appstate.load_projects_and_apps.failed", attributes: ["error": "\(error)"])
     }
   }
 

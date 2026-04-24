@@ -1,3 +1,4 @@
+import Owlmetry
 import SwiftUI
 
 struct UserDetailView: View {
@@ -22,6 +23,7 @@ struct UserDetailView: View {
     }
     .navigationTitle("User")
     .navigationBarTitleDisplayMode(.inline)
+    .owlScreen("UserDetail")
   }
 
   private var header: some View {

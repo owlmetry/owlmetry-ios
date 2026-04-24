@@ -1,3 +1,4 @@
+import Owlmetry
 import SwiftUI
 
 struct ServerURLSheet: View {
@@ -47,6 +48,7 @@ struct ServerURLSheet: View {
           Button("Save") { save() }
         }
       }
+      .owlScreen("ServerURL")
     }
   }
 
@@ -63,7 +65,11 @@ struct ServerURLSheet: View {
     let previous = APIConfig.baseURL
     APIConfig.baseURL = trimmed
     if APIConfig.baseURL != previous {
+      Owl.info("server_url.changed", screenName: "ServerURL")
       auth.logout()
+    }
+    if urlText == APIConfig.defaultBaseURL && previous != APIConfig.defaultBaseURL {
+      Owl.info("server_url.reset", screenName: "ServerURL")
     }
     Haptics.notify(.success)
     dismiss()

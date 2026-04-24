@@ -1,9 +1,11 @@
+import Owlmetry
 import SwiftUI
 
 struct SettingsSheet: View {
   @EnvironmentObject private var auth: AuthViewModel
   @EnvironmentObject private var appState: AppState
   @Environment(\.dismiss) private var dismiss
+  @State private var showFeedback = false
 
   var body: some View {
     NavigationStack {
@@ -33,6 +35,14 @@ struct SettingsSheet: View {
           .labelsHidden()
         }
 
+        Section("Feedback") {
+          Button {
+            showFeedback = true
+          } label: {
+            Label("Send feedback", systemImage: "bubble.left.and.bubble.right")
+          }
+        }
+
         Section {
           Button(role: .destructive) {
             auth.logout()
@@ -55,6 +65,19 @@ struct SettingsSheet: View {
             .fontWeight(.semibold)
         }
       }
+      .sheet(isPresented: $showFeedback) {
+        NavigationStack {
+          OwlFeedbackView(
+            name: auth.currentUser?.name,
+            email: auth.currentUser?.email,
+            onSubmitted: { _ in showFeedback = false },
+            onCancel: { showFeedback = false }
+          )
+          .navigationTitle("Feedback")
+          .navigationBarTitleDisplayMode(.inline)
+        }
+      }
+      .owlScreen("Settings")
     }
   }
 }

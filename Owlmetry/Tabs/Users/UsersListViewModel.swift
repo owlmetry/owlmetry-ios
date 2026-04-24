@@ -1,5 +1,6 @@
 import Combine
 import Foundation
+import Owlmetry
 
 enum UsersTimeRange: String, CaseIterable, Identifiable {
   case allTime
@@ -101,8 +102,10 @@ final class UsersListViewModel: ObservableObject {
       state = users.isEmpty ? .empty : .loaded(())
     } catch let error as APIError {
       state = .error(error.errorDescription ?? "Failed to load users")
+      Owl.error("users.list.failed", attributes: ["error": "\(error)"])
     } catch {
       state = .error(error.localizedDescription)
+      Owl.error("users.list.failed", attributes: ["error": "\(error)"])
     }
   }
 
@@ -126,7 +129,7 @@ final class UsersListViewModel: ObservableObject {
       self.cursor = dto.cursor
       hasMore = dto.hasMore ?? false
     } catch {
-      // silently swallow append errors; list stays functional
+      Owl.error("users.list.load_more.failed", attributes: ["error": "\(error)"])
     }
   }
 }

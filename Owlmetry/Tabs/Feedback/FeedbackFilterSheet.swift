@@ -1,3 +1,4 @@
+import Owlmetry
 import SwiftUI
 
 struct FeedbackFilterSheet: View {
@@ -30,5 +31,6 @@ struct FeedbackFilterSheet: View {
         Toggle("Include dev mode feedback", isOn: $filter.includeDev)
       }
     }
+    .owlScreen("FeedbackFilter")
   }
 }

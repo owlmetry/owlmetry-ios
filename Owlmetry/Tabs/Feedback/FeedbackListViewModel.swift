@@ -1,5 +1,6 @@
 import Combine
 import Foundation
+import Owlmetry
 
 struct FeedbackFilter: Equatable {
   var appId: String? = nil
@@ -49,8 +50,10 @@ final class FeedbackListViewModel: ObservableObject {
       state = items.isEmpty ? .empty : .loaded(())
     } catch let error as APIError {
       state = .error(error.errorDescription ?? "Failed to load feedback")
+      Owl.error("feedback.list.failed", attributes: ["error": "\(error)"])
     } catch {
       state = .error(error.localizedDescription)
+      Owl.error("feedback.list.failed", attributes: ["error": "\(error)"])
     }
   }
 }

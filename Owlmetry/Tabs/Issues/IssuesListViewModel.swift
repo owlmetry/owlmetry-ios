@@ -1,5 +1,6 @@
 import Combine
 import Foundation
+import Owlmetry
 
 struct IssueFilter: Equatable {
   var appId: String? = nil
@@ -39,8 +40,10 @@ final class IssuesListViewModel: ObservableObject {
       state = issues.isEmpty ? .empty : .loaded(())
     } catch let error as APIError {
       state = .error(error.errorDescription ?? "Failed to load issues")
+      Owl.error("issues.list.failed", attributes: ["error": "\(error)"])
     } catch {
       state = .error(error.localizedDescription)
+      Owl.error("issues.list.failed", attributes: ["error": "\(error)"])
     }
   }
 

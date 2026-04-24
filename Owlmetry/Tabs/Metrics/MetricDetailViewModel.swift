@@ -1,5 +1,6 @@
 import Combine
 import Foundation
+import Owlmetry
 
 enum MetricTimeRange: String, CaseIterable, Identifiable {
   case last24h = "24h"
@@ -57,8 +58,10 @@ final class MetricDetailViewModel: ObservableObject {
       self.events = try await events.events
     } catch let error as APIError {
       errorMessage = error.errorDescription
+      Owl.error("metric.detail.load.failed", attributes: ["error": "\(error)", "slug": slug])
     } catch {
       errorMessage = error.localizedDescription
+      Owl.error("metric.detail.load.failed", attributes: ["error": "\(error)", "slug": slug])
     }
   }
 }

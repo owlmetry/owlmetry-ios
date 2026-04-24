@@ -1,4 +1,5 @@
 import Foundation
+import Owlmetry
 
 enum APIError: Error, LocalizedError {
   case http(status: Int, message: String)
@@ -12,6 +13,15 @@ enum APIError: Error, LocalizedError {
     case .decoding: return "Unexpected response from server."
     case .transport: return "Network error — please try again."
     case .invalidURL: return "Invalid server URL."
+    }
+  }
+
+  var metricAttributes: [String: String] {
+    switch self {
+    case .http(let status, _): return ["kind": "http", "status": "\(status)"]
+    case .decoding: return ["kind": "decoding"]
+    case .transport: return ["kind": "transport"]
+    case .invalidURL: return ["kind": "invalid_url"]
     }
   }
 }
@@ -63,7 +73,13 @@ struct APIClient {
     body: Req?,
     query: [String: String?]
   ) async throws -> Res {
+    let op = Owl.startOperation("api-call", attributes: [
+      "method": method,
+      "path": path,
+    ])
+
     guard let url = buildURL(path: path, query: query) else {
+      op.fail(error: "invalid_url", attributes: ["kind": "invalid_url"])
       throw APIError.invalidURL
     }
 
@@ -80,6 +96,7 @@ struct APIClient {
       do {
         req.httpBody = try encoder.encode(body)
       } catch {
+        op.fail(error: "\(error)", attributes: ["kind": "encoding"])
         throw APIError.decoding(error)
       }
     }
@@ -89,10 +106,12 @@ struct APIClient {
     do {
       (data, response) = try await session.data(for: req)
     } catch {
+      op.fail(error: "\(error)", attributes: ["kind": "transport"])
       throw APIError.transport(error)
     }
 
     guard let http = response as? HTTPURLResponse else {
+      op.fail(error: "bad_server_response", attributes: ["kind": "transport"])
       throw APIError.transport(URLError(.badServerResponse))
     }
 
@@ -103,12 +122,17 @@ struct APIClient {
       } else {
         message = HTTPURLResponse.localizedString(forStatusCode: http.statusCode)
       }
-      throw APIError.http(status: http.statusCode, message: message)
+      let err = APIError.http(status: http.statusCode, message: message)
+      op.fail(error: message, attributes: err.metricAttributes)
+      throw err
     }
 
     do {
-      return try decoder.decode(Res.self, from: data)
+      let decoded = try decoder.decode(Res.self, from: data)
+      op.complete(attributes: ["status": "\(http.statusCode)"])
+      return decoded
     } catch {
+      op.fail(error: "\(error)", attributes: ["kind": "decoding"])
       throw APIError.decoding(error)
     }
   }

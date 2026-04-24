@@ -1,3 +1,4 @@
+import Owlmetry
 import SwiftUI
 
 struct IssuesListView: View {
@@ -35,6 +36,7 @@ struct IssuesListView: View {
       }
       .refreshable { await reload() }
       .autoRefresh(id: refreshKey, every: 30) { await reload() }
+      .owlScreen("IssuesList")
   }
 
   @ViewBuilder

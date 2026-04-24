@@ -1,3 +1,4 @@
+import Owlmetry
 import SwiftUI
 
 struct FunnelsListView: View {
@@ -19,6 +20,7 @@ struct FunnelsListView: View {
       .task(id: appState.selectedProjectId) {
         await viewModel.load(projectId: appState.selectedProjectId)
       }
+      .owlScreen("FunnelsList")
   }
 
   @ViewBuilder

@@ -1,3 +1,4 @@
+import Owlmetry
 import SwiftUI
 
 struct UsersFilterSheet: View {
@@ -57,5 +58,6 @@ struct UsersFilterSheet: View {
         }
       }
     }
+    .owlScreen("UsersFilter")
   }
 }

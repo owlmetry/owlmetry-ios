@@ -1,3 +1,4 @@
+import Owlmetry
 import SwiftUI
 
 struct IssueFilterSheet: View {
@@ -30,5 +31,6 @@ struct IssueFilterSheet: View {
         Toggle("Include dev mode issues", isOn: $filter.includeDev)
       }
     }
+    .owlScreen("IssuesFilter")
   }
 }

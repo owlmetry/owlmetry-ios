@@ -1,5 +1,6 @@
 import Combine
 import Foundation
+import Owlmetry
 
 @MainActor
 final class FeedbackDetailViewModel: ObservableObject {
@@ -14,8 +15,10 @@ final class FeedbackDetailViewModel: ObservableObject {
       comments = detail.comments
     } catch let error as APIError {
       errorMessage = error.errorDescription
+      Owl.error("feedback.detail.load.failed", attributes: ["error": "\(error)", "feedback_id": feedbackId])
     } catch {
       errorMessage = error.localizedDescription
+      Owl.error("feedback.detail.load.failed", attributes: ["error": "\(error)", "feedback_id": feedbackId])
     }
   }
 
@@ -24,8 +27,10 @@ final class FeedbackDetailViewModel: ObservableObject {
       feedback = try await FeedbackService.updateStatus(projectId: projectId, feedbackId: feedbackId, status: status)
     } catch let error as APIError {
       errorMessage = error.errorDescription
+      Owl.error("feedback.status.update.failed", attributes: ["error": "\(error)", "feedback_id": feedbackId, "status": status.rawValue])
     } catch {
       errorMessage = error.localizedDescription
+      Owl.error("feedback.status.update.failed", attributes: ["error": "\(error)", "feedback_id": feedbackId, "status": status.rawValue])
     }
   }
 
@@ -35,9 +40,11 @@ final class FeedbackDetailViewModel: ObservableObject {
       return true
     } catch let error as APIError {
       errorMessage = error.errorDescription
+      Owl.error("feedback.delete.failed", attributes: ["error": "\(error)", "feedback_id": feedbackId])
       return false
     } catch {
       errorMessage = error.localizedDescription
+      Owl.error("feedback.delete.failed", attributes: ["error": "\(error)", "feedback_id": feedbackId])
       return false
     }
   }

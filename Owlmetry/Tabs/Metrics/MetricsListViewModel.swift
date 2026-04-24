@@ -1,5 +1,6 @@
 import Combine
 import Foundation
+import Owlmetry
 
 @MainActor
 final class MetricsListViewModel: ObservableObject {
@@ -18,8 +19,10 @@ final class MetricsListViewModel: ObservableObject {
       state = metrics.isEmpty ? .empty : .loaded(())
     } catch let error as APIError {
       state = .error(error.errorDescription ?? "Failed to load metrics")
+      Owl.error("metrics.list.failed", attributes: ["error": "\(error)"])
     } catch {
       state = .error(error.localizedDescription)
+      Owl.error("metrics.list.failed", attributes: ["error": "\(error)"])
     }
   }
 }

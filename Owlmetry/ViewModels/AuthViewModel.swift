@@ -1,5 +1,6 @@
 import Combine
 import Foundation
+import Owlmetry
 
 @MainActor
 class AuthViewModel: ObservableObject {
@@ -24,6 +25,7 @@ class AuthViewModel: ObservableObject {
     let trimmed = email.trimmingCharacters(in: .whitespacesAndNewlines)
     guard !trimmed.isEmpty else {
       errorMessage = "Please enter your email."
+      Owl.warn("auth.email.invalid", screenName: "SignInEmail")
       return
     }
 
@@ -37,22 +39,27 @@ class AuthViewModel: ObservableObject {
         body: SendCodeRequest(email: trimmed)
       )
       pendingEmail = trimmed
+      Owl.info("auth.send_code.succeeded", screenName: "SignInEmail")
     } catch let error as APIError {
       errorMessage = error.errorDescription
+      Owl.error("auth.send_code.failed", screenName: "SignInEmail", attributes: ["error": "\(error)"])
     } catch {
       errorMessage = error.localizedDescription
+      Owl.error("auth.send_code.failed", screenName: "SignInEmail", attributes: ["error": "\(error)"])
     }
   }
 
   func verifyCode(_ code: String) async {
     guard let email = pendingEmail else {
       errorMessage = "Please enter your email first."
+      Owl.warn("auth.code.no_pending_email", screenName: "SignInCode")
       return
     }
 
     let trimmed = code.trimmingCharacters(in: .whitespacesAndNewlines)
     guard trimmed.count == 6 else {
       errorMessage = "Enter the 6-digit code from your email."
+      Owl.warn("auth.code.invalid", screenName: "SignInCode", attributes: ["length": "\(trimmed.count)"])
       return
     }
 
@@ -70,14 +77,20 @@ class AuthViewModel: ObservableObject {
       currentUser = response.user
       teams = response.teams
       pendingEmail = nil
+      Owl.setUser(response.user.id)
+      Owl.info("auth.login.succeeded", screenName: "SignInCode")
     } catch let error as APIError {
       errorMessage = error.errorDescription
+      Owl.error("auth.verify_code.failed", screenName: "SignInCode", attributes: ["error": "\(error)"])
     } catch {
       errorMessage = error.localizedDescription
+      Owl.error("auth.verify_code.failed", screenName: "SignInCode", attributes: ["error": "\(error)"])
     }
   }
 
   func logout() {
+    Owl.info("auth.logout")
+    Owl.clearUser()
     KeychainService.deleteToken()
     UserDefaults.standard.removeObject(forKey: userCacheKey)
     UserDefaults.standard.removeObject(forKey: teamsCacheKey)

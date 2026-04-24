@@ -1,3 +1,4 @@
+import Owlmetry
 import SwiftUI
 
 struct EmailStepView: View {
@@ -36,6 +37,7 @@ struct EmailStepView: View {
     .sheet(isPresented: $showServerSheet) {
       ServerURLSheet()
     }
+    .owlScreen("SignInEmail")
   }
 
   private var header: some View {

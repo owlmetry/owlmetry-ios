@@ -1,3 +1,4 @@
+import Owlmetry
 import SwiftUI
 
 struct IssueDetailView: View {
@@ -54,6 +55,7 @@ struct IssueDetailView: View {
     .sheet(isPresented: $showResolveSheet) {
       resolveSheet
     }
+    .owlScreen("IssueDetail")
   }
 
   private var currentIssue: Issue {
