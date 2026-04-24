@@ -32,17 +32,38 @@ struct APIClient {
   }()
 
   func post<Req: Encodable, Res: Decodable>(_ path: String, body: Req) async throws -> Res {
-    try await request(path: path, method: "POST", body: body)
+    try await request(path: path, method: "POST", body: body, query: [:])
   }
 
   func get<Res: Decodable>(_ path: String) async throws -> Res {
-    try await request(path: path, method: "GET", body: Optional<Empty>.none)
+    try await request(path: path, method: "GET", body: Optional<Empty>.none, query: [:])
+  }
+
+  func get<Res: Decodable>(_ path: String, query: [String: String?]) async throws -> Res {
+    try await request(path: path, method: "GET", body: Optional<Empty>.none, query: query)
+  }
+
+  func patch<Req: Encodable, Res: Decodable>(_ path: String, body: Req) async throws -> Res {
+    try await request(path: path, method: "PATCH", body: body, query: [:])
+  }
+
+  func patchNoBody<Res: Decodable>(_ path: String) async throws -> Res {
+    try await request(path: path, method: "PATCH", body: Optional<Empty>.none, query: [:])
+  }
+
+  func delete<Res: Decodable>(_ path: String) async throws -> Res {
+    try await request(path: path, method: "DELETE", body: Optional<Empty>.none, query: [:])
   }
 
   private struct Empty: Encodable {}
 
-  private func request<Req: Encodable, Res: Decodable>(path: String, method: String, body: Req?) async throws -> Res {
-    guard let url = URL(string: APIConfig.baseURL + path) else {
+  private func request<Req: Encodable, Res: Decodable>(
+    path: String,
+    method: String,
+    body: Req?,
+    query: [String: String?]
+  ) async throws -> Res {
+    guard let url = buildURL(path: path, query: query) else {
       throw APIError.invalidURL
     }
 
@@ -90,5 +111,21 @@ struct APIClient {
     } catch {
       throw APIError.decoding(error)
     }
+  }
+
+  private func buildURL(path: String, query: [String: String?]) -> URL? {
+    guard var components = URLComponents(string: APIConfig.baseURL + path) else {
+      return nil
+    }
+    let items = query
+      .compactMap { (key, value) -> URLQueryItem? in
+        guard let value, !value.isEmpty else { return nil }
+        return URLQueryItem(name: key, value: value)
+      }
+      .sorted { $0.name < $1.name }
+    if !items.isEmpty {
+      components.queryItems = items
+    }
+    return components.url
   }
 }

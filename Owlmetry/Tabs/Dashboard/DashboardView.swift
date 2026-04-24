@@ -1,0 +1,184 @@
+import SwiftUI
+
+struct DashboardView: View {
+  @EnvironmentObject private var auth: AuthViewModel
+  @EnvironmentObject private var appState: AppState
+  @StateObject private var viewModel = DashboardViewModel()
+  @State private var showSettings = false
+
+  private let columns: [GridItem] = [
+    GridItem(.adaptive(minimum: 150, maximum: 240), spacing: 12)
+  ]
+
+  var body: some View {
+    ScrollView {
+      VStack(alignment: .leading, spacing: 16) {
+        header
+        LazyVGrid(columns: columns, spacing: 12) {
+          ForEach(cards) { card in
+            StatCard(
+              label: card.label,
+              systemImage: card.systemImage,
+              value: card.value,
+              isLoading: card.isLoading
+            )
+          }
+        }
+        if let error = viewModel.errorMessage {
+          Text(error)
+            .font(.footnote)
+            .foregroundStyle(.secondary)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.top, 8)
+        }
+      }
+      .padding(.horizontal, 16)
+      .padding(.vertical, 12)
+    }
+    .navigationTitle("Dashboard")
+    .navigationBarTitleDisplayMode(.large)
+    .toolbar {
+      ToolbarItem(placement: .topBarLeading) {
+        Button {
+          showSettings = true
+        } label: {
+          Image(systemName: "gearshape")
+        }
+      }
+      ToolbarItem(placement: .topBarTrailing) {
+        ProjectSelectorMenu()
+      }
+    }
+    .sheet(isPresented: $showSettings) {
+      SettingsSheet()
+    }
+    .refreshable {
+      await reload()
+    }
+    .autoRefresh(id: refreshKey, every: 30) {
+      await reload()
+    }
+  }
+
+  private var refreshKey: String {
+    let team = appState.currentTeam?.id ?? "-"
+    let proj = appState.selectedProjectId ?? "all"
+    return "\(team)|\(proj)|\(appState.dataMode.rawValue)"
+  }
+
+  private var header: some View {
+    VStack(alignment: .leading, spacing: 2) {
+      Text(currentDateLabel)
+        .font(.caption.weight(.medium))
+        .tracking(0.5)
+        .foregroundStyle(.secondary)
+      Text(greeting)
+        .font(.title2.bold())
+    }
+    .frame(maxWidth: .infinity, alignment: .leading)
+  }
+
+  private var currentDateLabel: String {
+    let f = DateFormatter()
+    f.dateStyle = .long
+    f.timeStyle = .none
+    return f.string(from: Date()).uppercased()
+  }
+
+  private var greeting: String {
+    let name = auth.currentUser?.name ?? ""
+    let first = name.split(separator: " ").first.map(String.init) ?? name
+    if first.isEmpty { return "Welcome back" }
+    return "Welcome back, \(first)"
+  }
+
+  private var cards: [CardData] {
+    [
+      CardData(
+        id: "open_issues",
+        label: "Open Issues",
+        systemImage: "ladybug",
+        value: format(viewModel.openIssuesCount),
+        isLoading: viewModel.openIssuesCount == nil
+      ),
+      CardData(
+        id: "events_24h",
+        label: "Events · 24h",
+        systemImage: "scroll",
+        value: format(viewModel.eventsCount),
+        isLoading: viewModel.eventsCount == nil
+      ),
+      CardData(
+        id: "users_24h",
+        label: "Users · 24h",
+        systemImage: "person.crop.circle.badge.magnifyingglass",
+        value: format(viewModel.uniqueUsers),
+        isLoading: viewModel.uniqueUsers == nil
+      ),
+      CardData(
+        id: "sessions_24h",
+        label: "Sessions · 24h",
+        systemImage: "point.3.connected.trianglepath.dotted",
+        value: format(viewModel.uniqueSessions),
+        isLoading: viewModel.uniqueSessions == nil
+      ),
+      CardData(
+        id: "metrics_24h",
+        label: "Metrics · 24h",
+        systemImage: "checkmark.circle",
+        value: format(viewModel.metricsCount),
+        isLoading: viewModel.metricsCount == nil
+      ),
+      CardData(
+        id: "funnels_24h",
+        label: "Funnels · 24h",
+        systemImage: "line.3.horizontal.decrease.circle",
+        value: funnelsValue,
+        isLoading: viewModel.funnelsCompletedCount == nil
+      ),
+      CardData(
+        id: "projects_apps",
+        label: "Projects · Apps",
+        systemImage: "folder",
+        value: projectsAppsValue,
+        isLoading: viewModel.projectCount == nil
+      )
+    ]
+  }
+
+  private var funnelsValue: String {
+    guard let completed = viewModel.funnelsCompletedCount else { return "—" }
+    let started = viewModel.funnelsStartedCount ?? 0
+    return "\(format(completed))/\(format(started))"
+  }
+
+  private var projectsAppsValue: String {
+    let p = viewModel.projectCount ?? appState.projectsForCurrentTeam.count
+    let a = viewModel.appCount ?? appState.apps.count
+    return "\(p) · \(a)"
+  }
+
+  private func format(_ value: Int?) -> String {
+    guard let value else { return "—" }
+    return value.formatted(.number)
+  }
+
+  private func reload() async {
+    guard let teamId = appState.currentTeam?.id else { return }
+    await viewModel.load(
+      teamId: teamId,
+      projectId: appState.selectedProjectId,
+      dataMode: appState.dataMode,
+      knownProjectCount: appState.projectsForCurrentTeam.count,
+      knownAppCount: appState.apps.count
+    )
+  }
+
+  private struct CardData: Identifiable {
+    let id: String
+    let label: String
+    let systemImage: String
+    let value: String
+    let isLoading: Bool
+  }
+}

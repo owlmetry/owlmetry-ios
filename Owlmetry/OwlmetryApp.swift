@@ -3,17 +3,13 @@ import SwiftUI
 @main
 struct OwlmetryApp: App {
   @StateObject private var auth = AuthViewModel.shared
+  @StateObject private var appState = AppState()
 
   var body: some Scene {
     WindowGroup {
-      Group {
-        if let user = auth.currentUser {
-          HomeView(user: user)
-        } else {
-          OnboardingView()
-        }
-      }
-      .environmentObject(auth)
+      RootView()
+        .environmentObject(auth)
+        .environmentObject(appState)
     }
   }
 }
