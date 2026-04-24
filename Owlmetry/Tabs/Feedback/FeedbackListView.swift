@@ -5,6 +5,7 @@ struct FeedbackListView: View {
   @EnvironmentObject private var appState: AppState
   @StateObject private var viewModel = FeedbackListViewModel()
   @State private var showFilter = false
+  @State private var selectedStatus: FeedbackStatus = .new
 
   var body: some View {
     content
@@ -48,41 +49,65 @@ struct FeedbackListView: View {
           )
         } else {
           LazyVStack(alignment: .leading, spacing: 0, pinnedViews: []) {
-            ForEach(FeedbackStatus.allCases) { status in
-              let items = viewModel.feedback(for: status)
-              if !items.isEmpty {
-                SectionHeader(title: status.displayName, count: items.count, emoji: status.emoji, tone: Theme.Status.color(for: status))
-                  .textCase(nil)
-                  .padding(.top, 4)
-                VStack(spacing: 8) {
-                  ForEach(items) { feedback in
-                    NavigationLink {
-                      FeedbackDetailView(
-                        feedback: feedback,
-                        onDeleted: { deletedId in
-                          viewModel.removeLocal(id: deletedId)
-                        },
-                        onUpdated: { updated in
-                          viewModel.replaceLocal(updated)
-                        }
-                      )
-                    } label: {
-                      FeedbackCard(
-                        feedback: feedback,
-                        app: appState.apps.first(where: { $0.id == feedback.appId }),
-                        project: appState.projectsById[feedback.projectId]
-                      )
-                    }
-                    .buttonStyle(.plain)
-                  }
-                }
-                .padding(.horizontal, 16)
-                .padding(.bottom, 8)
-              }
-            }
+            StatusTabBar(
+              items: FeedbackStatus.allCases.map { status in
+                StatusTabBar<FeedbackStatus>.Item(
+                  tag: status,
+                  label: status.displayName,
+                  emoji: status.emoji,
+                  count: viewModel.feedback(for: status).count,
+                  tone: Theme.Status.color(for: status)
+                )
+              },
+              selection: $selectedStatus
+            )
+            tabContent(for: selectedStatus)
+              .animation(.easeInOut(duration: 0.15), value: selectedStatus)
           }
         }
       }
+    }
+  }
+
+  @ViewBuilder
+  private func tabContent(for status: FeedbackStatus) -> some View {
+    let items = viewModel.feedback(for: status)
+    if items.isEmpty {
+      VStack(spacing: 8) {
+        Text(status.emoji)
+          .font(.largeTitle)
+        Text("No \(status.displayName.lowercased()) feedback")
+          .font(.subheadline)
+          .foregroundStyle(.secondary)
+      }
+      .frame(maxWidth: .infinity)
+      .padding(.vertical, 40)
+    } else {
+      VStack(spacing: 8) {
+        ForEach(items) { feedback in
+          NavigationLink {
+            FeedbackDetailView(
+              feedback: feedback,
+              onDeleted: { deletedId in
+                viewModel.removeLocal(id: deletedId)
+              },
+              onUpdated: { updated in
+                viewModel.replaceLocal(updated)
+              }
+            )
+          } label: {
+            FeedbackCard(
+              feedback: feedback,
+              app: appState.apps.first(where: { $0.id == feedback.appId }),
+              project: appState.projectsById[feedback.projectId]
+            )
+          }
+          .buttonStyle(.plain)
+        }
+      }
+      .padding(.horizontal, 16)
+      .padding(.top, 4)
+      .padding(.bottom, 8)
     }
   }
 

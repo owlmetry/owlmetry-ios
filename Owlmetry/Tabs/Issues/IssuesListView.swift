@@ -5,6 +5,7 @@ struct IssuesListView: View {
   @EnvironmentObject private var appState: AppState
   @StateObject private var viewModel = IssuesListViewModel()
   @State private var showFilter = false
+  @State private var selectedStatus: IssueStatus = .new
 
   var body: some View {
     content
@@ -58,33 +59,57 @@ struct IssuesListView: View {
           )
         } else {
           LazyVStack(alignment: .leading, spacing: 0, pinnedViews: []) {
-            ForEach(IssueStatus.allCases) { status in
-              let issues = viewModel.issues(for: status)
-              if !issues.isEmpty {
-                SectionHeader(title: status.displayName, count: issues.count, emoji: status.emoji, tone: Theme.Status.color(for: status))
-                  .textCase(nil)
-                  .padding(.top, 4)
-                VStack(spacing: 8) {
-                  ForEach(issues) { issue in
-                    NavigationLink {
-                      IssueDetailView(issue: issue)
-                    } label: {
-                      IssueCard(
-                        issue: issue,
-                        app: appState.apps.first(where: { $0.id == issue.appId }),
-                        project: appState.projectsById[issue.projectId]
-                      )
-                    }
-                    .buttonStyle(.plain)
-                  }
-                }
-                .padding(.horizontal, 16)
-                .padding(.bottom, 8)
-              }
-            }
+            StatusTabBar(
+              items: IssueStatus.allCases.map { status in
+                StatusTabBar<IssueStatus>.Item(
+                  tag: status,
+                  label: status.displayName,
+                  emoji: status.emoji,
+                  count: viewModel.issues(for: status).count,
+                  tone: Theme.Status.color(for: status)
+                )
+              },
+              selection: $selectedStatus
+            )
+            tabContent(for: selectedStatus)
+              .animation(.easeInOut(duration: 0.15), value: selectedStatus)
           }
         }
       }
+    }
+  }
+
+  @ViewBuilder
+  private func tabContent(for status: IssueStatus) -> some View {
+    let issues = viewModel.issues(for: status)
+    if issues.isEmpty {
+      VStack(spacing: 8) {
+        Text(status.emoji)
+          .font(.largeTitle)
+        Text("No \(status.displayName.lowercased()) issues")
+          .font(.subheadline)
+          .foregroundStyle(.secondary)
+      }
+      .frame(maxWidth: .infinity)
+      .padding(.vertical, 40)
+    } else {
+      VStack(spacing: 8) {
+        ForEach(issues) { issue in
+          NavigationLink {
+            IssueDetailView(issue: issue)
+          } label: {
+            IssueCard(
+              issue: issue,
+              app: appState.apps.first(where: { $0.id == issue.appId }),
+              project: appState.projectsById[issue.projectId]
+            )
+          }
+          .buttonStyle(.plain)
+        }
+      }
+      .padding(.horizontal, 16)
+      .padding(.top, 4)
+      .padding(.bottom, 8)
     }
   }
 

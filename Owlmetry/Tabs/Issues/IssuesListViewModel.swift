@@ -22,7 +22,14 @@ final class IssuesListViewModel: ObservableObject {
   }
 
   func issues(for status: IssueStatus) -> [Issue] {
-    issues.filter { $0.status == status }
+    let filtered = issues.filter { $0.status == status }
+    guard status == .new else { return filtered }
+    return filtered.sorted { lhs, rhs in
+      if lhs.uniqueUserCount != rhs.uniqueUserCount {
+        return lhs.uniqueUserCount > rhs.uniqueUserCount
+      }
+      return lhs.lastSeenAt > rhs.lastSeenAt
+    }
   }
 
   func load(teamId: String, projectId: String?, dataMode: DataMode) async {
