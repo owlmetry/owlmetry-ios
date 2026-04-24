@@ -30,9 +30,19 @@ struct FeedbackComment: Codable, Identifiable, Equatable, Hashable {
   let createdAt: String
 }
 
-struct FeedbackDetail: Codable, Equatable, Hashable {
+struct FeedbackDetail: Decodable, Equatable, Hashable {
   let feedback: Feedback
   let comments: [FeedbackComment]
+
+  private enum CodingKeys: String, CodingKey {
+    case comments
+  }
+
+  init(from decoder: Decoder) throws {
+    feedback = try Feedback(from: decoder)
+    let container = try decoder.container(keyedBy: CodingKeys.self)
+    comments = try container.decodeIfPresent([FeedbackComment].self, forKey: .comments) ?? []
+  }
 }
 
 struct FeedbackListDTO: Decodable {

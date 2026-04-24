@@ -29,6 +29,11 @@ final class FeedbackListViewModel: ObservableObject {
     }
   }
 
+  func replaceLocal(_ feedback: Feedback) {
+    guard let index = items.firstIndex(where: { $0.id == feedback.id }) else { return }
+    items[index] = feedback
+  }
+
   func load(teamId: String, projectId: String?, dataMode: DataMode) async {
     state = .loading
     do {

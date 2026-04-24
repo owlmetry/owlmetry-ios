@@ -48,12 +48,10 @@ enum FeedbackService {
     status: FeedbackStatus
   ) async throws -> Feedback {
     struct Body: Encodable { let status: String }
-    struct Envelope: Decodable { let feedback: Feedback }
-    let envelope: Envelope = try await APIClient.shared.patch(
+    return try await APIClient.shared.patch(
       "/v1/projects/\(projectId)/feedback/\(feedbackId)",
       body: Body(status: status.rawValue)
     )
-    return envelope.feedback
   }
 
   static func remove(projectId: String, feedbackId: String) async throws {

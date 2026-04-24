@@ -1,8 +1,10 @@
+import Owlmetry
 import SwiftUI
 
 struct FeedbackDetailView: View {
   let feedback: Feedback
   var onDeleted: ((String) -> Void)? = nil
+  var onUpdated: ((Feedback) -> Void)? = nil
 
   @EnvironmentObject private var appState: AppState
   @StateObject private var viewModel = FeedbackDetailViewModel()
@@ -49,6 +51,7 @@ struct FeedbackDetailView: View {
     } message: {
       Text("This cannot be undone.")
     }
+    .owlScreen("FeedbackDetail")
   }
 
   private var header: some View {
@@ -146,6 +149,9 @@ struct FeedbackDetailView: View {
         Button {
           Task {
             await viewModel.updateStatus(projectId: feedback.projectId, feedbackId: feedback.id, status: status)
+            if let updated = viewModel.feedback {
+              onUpdated?(updated)
+            }
           }
         } label: {
           Label("Move to \(status.displayName)", systemImage: "arrow.right")

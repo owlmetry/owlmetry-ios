@@ -1,3 +1,4 @@
+import Owlmetry
 import SwiftUI
 
 struct FeedbackListView: View {
@@ -27,6 +28,7 @@ struct FeedbackListView: View {
       }
       .refreshable { await reload() }
       .autoRefresh(id: refreshKey, every: 30) { await reload() }
+      .owlScreen("FeedbackList")
   }
 
   @ViewBuilder
@@ -55,9 +57,15 @@ struct FeedbackListView: View {
                 VStack(spacing: 8) {
                   ForEach(items) { feedback in
                     NavigationLink {
-                      FeedbackDetailView(feedback: feedback) { deletedId in
-                        viewModel.removeLocal(id: deletedId)
-                      }
+                      FeedbackDetailView(
+                        feedback: feedback,
+                        onDeleted: { deletedId in
+                          viewModel.removeLocal(id: deletedId)
+                        },
+                        onUpdated: { updated in
+                          viewModel.replaceLocal(updated)
+                        }
+                      )
                     } label: {
                       FeedbackCard(
                         feedback: feedback,
