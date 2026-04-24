@@ -23,6 +23,7 @@ struct UserDetailView: View {
     }
     .navigationTitle("User")
     .navigationBarTitleDisplayMode(.inline)
+    .toolbar(.hidden, for: .tabBar)
     .owlScreen("UserDetail")
   }
 

@@ -32,6 +32,7 @@ struct MetricDetailView: View {
     .task(id: "\(metric.id)|\(viewModel.range.rawValue)|\(appState.dataMode.rawValue)") {
       await reload()
     }
+    .toolbar(.hidden, for: .tabBar)
     .owlScreen("MetricDetail")
   }
 

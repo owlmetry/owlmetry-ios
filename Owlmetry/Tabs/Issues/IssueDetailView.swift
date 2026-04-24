@@ -55,6 +55,7 @@ struct IssueDetailView: View {
     .sheet(isPresented: $showResolveSheet) {
       resolveSheet
     }
+    .toolbar(.hidden, for: .tabBar)
     .owlScreen("IssueDetail")
   }
 

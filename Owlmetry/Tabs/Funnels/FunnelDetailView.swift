@@ -29,6 +29,7 @@ struct FunnelDetailView: View {
     .task(id: "\(funnel.id)|\(viewModel.range.rawValue)|\(appState.dataMode.rawValue)") {
       await reload()
     }
+    .toolbar(.hidden, for: .tabBar)
     .owlScreen("FunnelDetail")
   }
 

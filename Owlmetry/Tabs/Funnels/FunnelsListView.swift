@@ -20,6 +20,7 @@ struct FunnelsListView: View {
       .task(id: appState.selectedProjectId) {
         await viewModel.load(projectId: appState.selectedProjectId)
       }
+      .toolbar(.hidden, for: .tabBar)
       .owlScreen("FunnelsList")
   }
 

@@ -51,6 +51,7 @@ struct FeedbackDetailView: View {
     } message: {
       Text("This cannot be undone.")
     }
+    .toolbar(.hidden, for: .tabBar)
     .owlScreen("FeedbackDetail")
   }
 
