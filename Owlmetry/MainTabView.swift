@@ -31,7 +31,15 @@ struct MainTabView: View {
   }
 
   var body: some View {
-    TabView(selection: $selection) {
+    TabView(selection: Binding(
+      get: { selection },
+      set: { newValue in
+        if newValue != selection {
+          Haptics.play(.light)
+        }
+        selection = newValue
+      }
+    )) {
       NavigationStack { DashboardView() }
         .tabItem { Image(systemName: "house") }
         .tag(Tab.dashboard)
