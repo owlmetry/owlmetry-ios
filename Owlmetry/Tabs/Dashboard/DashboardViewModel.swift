@@ -12,11 +12,11 @@ final class DashboardViewModel: ObservableObject {
   @Published var funnelsStartedCount: Int?
   @Published var projectCount: Int?
   @Published var appCount: Int?
+  @Published var lastUpdatedAt: Date?
 
   @Published var errorMessage: String?
 
   func load(teamId: String, projectId: String?, dataMode: DataMode, knownProjectCount: Int, knownAppCount: Int) async {
-    errorMessage = nil
     projectCount = knownProjectCount
     appCount = knownAppCount
 
@@ -27,15 +27,37 @@ final class DashboardViewModel: ObservableObject {
     async let metrics = fetchMetricsCount(teamId: teamId, projectId: projectId, since: since, dataMode: dataMode)
     async let funnels = fetchFunnelsCount(teamId: teamId, projectId: projectId, since: since, dataMode: dataMode)
 
-    openIssuesCount = await openIssues
-    let eventsResponse = await events
-    eventsCount = eventsResponse?.count
-    uniqueUsers = eventsResponse?.uniqueUsers
-    uniqueSessions = eventsResponse?.uniqueSessions
-    metricsCount = await metrics
-    let funnelsResponse = await funnels
-    funnelsCompletedCount = funnelsResponse?.count
-    funnelsStartedCount = funnelsResponse?.started
+    let openIssuesResult = await openIssues
+    let eventsResult = await events
+    let metricsResult = await metrics
+    let funnelsResult = await funnels
+
+    if let v = openIssuesResult { openIssuesCount = v }
+    if let r = eventsResult {
+      eventsCount = r.count
+      uniqueUsers = r.uniqueUsers
+      uniqueSessions = r.uniqueSessions
+    }
+    if let v = metricsResult { metricsCount = v }
+    if let r = funnelsResult {
+      funnelsCompletedCount = r.count
+      funnelsStartedCount = r.started
+    }
+
+    let allFailed = openIssuesResult == nil
+      && eventsResult == nil
+      && metricsResult == nil
+      && funnelsResult == nil
+    let anyCachedData = openIssuesCount != nil
+      || eventsCount != nil
+      || metricsCount != nil
+      || funnelsCompletedCount != nil
+    if allFailed && !anyCachedData {
+      errorMessage = "Couldn't load dashboard. Pull to retry."
+    } else {
+      errorMessage = nil
+      lastUpdatedAt = Date()
+    }
   }
 
   private func fetchOpenIssuesCount(teamId: String, projectId: String?, dataMode: DataMode) async -> Int? {
@@ -48,18 +70,12 @@ final class DashboardViewModel: ObservableObject {
       )
       return dto.issues.filter { IssueStatus.openStatuses.contains($0.status) }.count
     } catch {
-      errorMessage = (error as? APIError)?.errorDescription ?? error.localizedDescription
       return nil
     }
   }
 
   private func fetchEventsCount(teamId: String, projectId: String?, since: String, dataMode: DataMode) async -> EventsCountResponse? {
-    do {
-      return try await EventsService.count(teamId: teamId, projectId: projectId, since: since, dataMode: dataMode)
-    } catch {
-      errorMessage = (error as? APIError)?.errorDescription ?? error.localizedDescription
-      return nil
-    }
+    try? await EventsService.count(teamId: teamId, projectId: projectId, since: since, dataMode: dataMode)
   }
 
   private func fetchMetricsCount(teamId: String, projectId: String?, since: String, dataMode: DataMode) async -> Int? {
@@ -67,17 +83,11 @@ final class DashboardViewModel: ObservableObject {
       let r = try await MetricsService.completionsCount(teamId: teamId, projectId: projectId, since: since, dataMode: dataMode)
       return r.count
     } catch {
-      errorMessage = (error as? APIError)?.errorDescription ?? error.localizedDescription
       return nil
     }
   }
 
   private func fetchFunnelsCount(teamId: String, projectId: String?, since: String, dataMode: DataMode) async -> CompletionsCountResponse? {
-    do {
-      return try await FunnelsService.completionsCount(teamId: teamId, projectId: projectId, since: since, dataMode: dataMode)
-    } catch {
-      errorMessage = (error as? APIError)?.errorDescription ?? error.localizedDescription
-      return nil
-    }
+    try? await FunnelsService.completionsCount(teamId: teamId, projectId: projectId, since: since, dataMode: dataMode)
   }
 }

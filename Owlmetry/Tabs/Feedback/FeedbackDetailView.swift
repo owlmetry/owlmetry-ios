@@ -2,9 +2,12 @@ import SwiftUI
 
 struct FeedbackDetailView: View {
   let feedback: Feedback
+  var onDeleted: ((String) -> Void)? = nil
 
   @EnvironmentObject private var appState: AppState
   @StateObject private var viewModel = FeedbackDetailViewModel()
+  @Environment(\.dismiss) private var dismiss
+  @State private var showDeleteConfirm = false
 
   private var current: Feedback { viewModel.feedback ?? feedback }
   private var project: Project? { appState.projectsById[feedback.projectId] }
@@ -27,6 +30,24 @@ struct FeedbackDetailView: View {
     }
     .task(id: feedback.id) {
       await viewModel.load(projectId: feedback.projectId, feedbackId: feedback.id)
+    }
+    .confirmationDialog(
+      "Delete this feedback?",
+      isPresented: $showDeleteConfirm,
+      titleVisibility: .visible
+    ) {
+      Button("Delete", role: .destructive) {
+        Task {
+          let ok = await viewModel.deleteFeedback(projectId: feedback.projectId, feedbackId: feedback.id)
+          if ok {
+            onDeleted?(feedback.id)
+            dismiss()
+          }
+        }
+      }
+      Button("Cancel", role: .cancel) {}
+    } message: {
+      Text("This cannot be undone.")
     }
   }
 
@@ -129,6 +150,12 @@ struct FeedbackDetailView: View {
         } label: {
           Label("Move to \(status.displayName)", systemImage: "arrow.right")
         }
+      }
+      Divider()
+      Button(role: .destructive) {
+        showDeleteConfirm = true
+      } label: {
+        Label("Delete", systemImage: "trash")
       }
     } label: {
       Image(systemName: "ellipsis.circle")

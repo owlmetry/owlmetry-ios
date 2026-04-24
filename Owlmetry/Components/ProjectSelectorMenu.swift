@@ -1,30 +1,36 @@
 import SwiftUI
+import UIKit
 
 struct ProjectSelectorMenu: View {
   @EnvironmentObject private var appState: AppState
 
+  private var projectSelection: Binding<String?> {
+    Binding(
+      get: { appState.selectedProjectId },
+      set: { appState.setSelectedProject($0) }
+    )
+  }
+
   var body: some View {
     Menu {
-      Button {
-        appState.setSelectedProject(nil)
-      } label: {
-        Label("All projects", systemImage: appState.selectedProjectId == nil ? "checkmark" : "")
-      }
-      if !appState.projectsForCurrentTeam.isEmpty {
-        Divider()
-      }
-      ForEach(appState.projectsForCurrentTeam) { project in
-        Button {
-          appState.setSelectedProject(project.id)
-        } label: {
-          HStack {
+      Picker("Project", selection: projectSelection) {
+        Label {
+          Text("All projects")
+        } icon: {
+          Image(systemName: "square.grid.2x2")
+        }
+        .tag(String?.none)
+
+        ForEach(appState.projectsForCurrentTeam) { project in
+          Label {
             Text(project.name)
-            if appState.selectedProjectId == project.id {
-              Image(systemName: "checkmark")
-            }
+          } icon: {
+            Image(uiImage: Self.coloredDot(hex: project.color))
           }
+          .tag(Optional(project.id))
         }
       }
+      .pickerStyle(.inline)
     } label: {
       HStack(spacing: 6) {
         if let project = appState.selectedProject {
@@ -41,14 +47,17 @@ struct ProjectSelectorMenu: View {
           .foregroundStyle(.secondary)
       }
       .font(.subheadline.weight(.medium))
-      .padding(.horizontal, 10)
-      .padding(.vertical, 6)
-      .background(
-        Capsule().fill(Theme.cardBackground)
-      )
-      .overlay(
-        Capsule().stroke(Theme.cardBorder, lineWidth: 1)
-      )
     }
+  }
+
+  private static func coloredDot(hex: String) -> UIImage {
+    let color = UIColor(ProjectColor(hex: hex).base)
+    let size = CGSize(width: 14, height: 14)
+    let renderer = UIGraphicsImageRenderer(size: size)
+    let image = renderer.image { ctx in
+      color.setFill()
+      ctx.cgContext.fillEllipse(in: CGRect(origin: .zero, size: size))
+    }
+    return image.withRenderingMode(.alwaysOriginal)
   }
 }

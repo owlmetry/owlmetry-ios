@@ -55,4 +55,11 @@ enum FeedbackService {
     )
     return envelope.feedback
   }
+
+  static func remove(projectId: String, feedbackId: String) async throws {
+    struct Envelope: Decodable { let deleted: Bool }
+    let _: Envelope = try await APIClient.shared.delete(
+      "/v1/projects/\(projectId)/feedback/\(feedbackId)"
+    )
+  }
 }

@@ -22,6 +22,13 @@ final class FeedbackListViewModel: ObservableObject {
     items.filter { $0.status == status }
   }
 
+  func removeLocal(id: String) {
+    items.removeAll { $0.id == id }
+    if items.isEmpty, case .loaded = state {
+      state = .empty
+    }
+  }
+
   func load(teamId: String, projectId: String?, dataMode: DataMode) async {
     state = .loading
     do {

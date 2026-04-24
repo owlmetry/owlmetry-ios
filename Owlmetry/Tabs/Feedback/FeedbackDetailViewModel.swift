@@ -28,4 +28,17 @@ final class FeedbackDetailViewModel: ObservableObject {
       errorMessage = error.localizedDescription
     }
   }
+
+  func deleteFeedback(projectId: String, feedbackId: String) async -> Bool {
+    do {
+      try await FeedbackService.remove(projectId: projectId, feedbackId: feedbackId)
+      return true
+    } catch let error as APIError {
+      errorMessage = error.errorDescription
+      return false
+    } catch {
+      errorMessage = error.localizedDescription
+      return false
+    }
+  }
 }

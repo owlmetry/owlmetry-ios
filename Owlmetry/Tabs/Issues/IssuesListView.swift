@@ -47,40 +47,42 @@ struct IssuesListView: View {
         Task { await reload() }
       }
     default:
-      List {
+      ScrollView {
         if viewModel.issues.isEmpty {
           EmptyState(
             systemImage: "ladybug",
             title: "No issues yet",
             subtitle: "Issues from recent sessions will appear here when the SDK reports errors."
           )
-          .listRowBackground(Color.clear)
-          .listRowSeparator(.hidden)
         } else {
-          ForEach(IssueStatus.allCases) { status in
-            let issues = viewModel.issues(for: status)
-            if !issues.isEmpty {
-              Section {
-                ForEach(issues) { issue in
-                  NavigationLink {
-                    IssueDetailView(issue: issue)
-                  } label: {
-                    IssueCard(issue: issue, app: appState.apps.first(where: { $0.id == issue.appId }), project: appState.projectsById[issue.projectId])
-                  }
-                  .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
-                  .listRowSeparator(.hidden)
-                  .listRowBackground(Color.clear)
-                  .buttonStyle(.plain)
-                }
-              } header: {
+          LazyVStack(alignment: .leading, spacing: 0, pinnedViews: []) {
+            ForEach(IssueStatus.allCases) { status in
+              let issues = viewModel.issues(for: status)
+              if !issues.isEmpty {
                 SectionHeader(title: status.displayName, count: issues.count, emoji: status.emoji, tone: Theme.Status.color(for: status))
                   .textCase(nil)
+                  .padding(.top, 4)
+                VStack(spacing: 8) {
+                  ForEach(issues) { issue in
+                    NavigationLink {
+                      IssueDetailView(issue: issue)
+                    } label: {
+                      IssueCard(
+                        issue: issue,
+                        app: appState.apps.first(where: { $0.id == issue.appId }),
+                        project: appState.projectsById[issue.projectId]
+                      )
+                    }
+                    .buttonStyle(.plain)
+                  }
+                }
+                .padding(.horizontal, 16)
+                .padding(.bottom, 8)
               }
             }
           }
         }
       }
-      .listStyle(.plain)
     }
   }
 

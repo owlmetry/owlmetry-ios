@@ -37,44 +37,44 @@ struct FeedbackListView: View {
     case .error(let message) where viewModel.items.isEmpty:
       ErrorState(message: message) { Task { await reload() } }
     default:
-      List {
+      ScrollView {
         if viewModel.items.isEmpty {
           EmptyState(
             systemImage: "bubble.left",
             title: "No feedback yet",
             subtitle: "Submissions from the in-app feedback view will appear here."
           )
-          .listRowBackground(Color.clear)
-          .listRowSeparator(.hidden)
         } else {
-          ForEach(FeedbackStatus.allCases) { status in
-            let items = viewModel.feedback(for: status)
-            if !items.isEmpty {
-              Section {
-                ForEach(items) { feedback in
-                  NavigationLink {
-                    FeedbackDetailView(feedback: feedback)
-                  } label: {
-                    FeedbackCard(
-                      feedback: feedback,
-                      app: appState.apps.first(where: { $0.id == feedback.appId }),
-                      project: appState.projectsById[feedback.projectId]
-                    )
-                  }
-                  .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
-                  .listRowSeparator(.hidden)
-                  .listRowBackground(Color.clear)
-                  .buttonStyle(.plain)
-                }
-              } header: {
+          LazyVStack(alignment: .leading, spacing: 0, pinnedViews: []) {
+            ForEach(FeedbackStatus.allCases) { status in
+              let items = viewModel.feedback(for: status)
+              if !items.isEmpty {
                 SectionHeader(title: status.displayName, count: items.count, emoji: status.emoji, tone: Theme.Status.color(for: status))
                   .textCase(nil)
+                  .padding(.top, 4)
+                VStack(spacing: 8) {
+                  ForEach(items) { feedback in
+                    NavigationLink {
+                      FeedbackDetailView(feedback: feedback) { deletedId in
+                        viewModel.removeLocal(id: deletedId)
+                      }
+                    } label: {
+                      FeedbackCard(
+                        feedback: feedback,
+                        app: appState.apps.first(where: { $0.id == feedback.appId }),
+                        project: appState.projectsById[feedback.projectId]
+                      )
+                    }
+                    .buttonStyle(.plain)
+                  }
+                }
+                .padding(.horizontal, 16)
+                .padding(.bottom, 8)
               }
             }
           }
         }
       }
-      .listStyle(.plain)
     }
   }
 

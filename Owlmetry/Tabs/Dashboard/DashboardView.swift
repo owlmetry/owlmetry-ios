@@ -1,7 +1,6 @@
 import SwiftUI
 
 struct DashboardView: View {
-  @EnvironmentObject private var auth: AuthViewModel
   @EnvironmentObject private var appState: AppState
   @StateObject private var viewModel = DashboardViewModel()
   @State private var showSettings = false
@@ -12,8 +11,8 @@ struct DashboardView: View {
 
   var body: some View {
     ScrollView {
-      VStack(alignment: .leading, spacing: 16) {
-        header
+      VStack(alignment: .leading, spacing: 12) {
+        lastUpdatedLabel
         LazyVGrid(columns: columns, spacing: 12) {
           ForEach(cards) { card in
             StatCard(
@@ -66,30 +65,29 @@ struct DashboardView: View {
     return "\(team)|\(proj)|\(appState.dataMode.rawValue)"
   }
 
-  private var header: some View {
-    VStack(alignment: .leading, spacing: 2) {
-      Text(currentDateLabel)
-        .font(.caption.weight(.medium))
-        .tracking(0.5)
+  private var lastUpdatedLabel: some View {
+    TimelineView(.periodic(from: .now, by: 15)) { context in
+      Text(updatedString(at: context.date))
+        .font(.caption)
         .foregroundStyle(.secondary)
-      Text(greeting)
-        .font(.title2.bold())
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
-    .frame(maxWidth: .infinity, alignment: .leading)
   }
 
-  private var currentDateLabel: String {
-    let f = DateFormatter()
-    f.dateStyle = .long
-    f.timeStyle = .none
-    return f.string(from: Date()).uppercased()
-  }
-
-  private var greeting: String {
-    let name = auth.currentUser?.name ?? ""
-    let first = name.split(separator: " ").first.map(String.init) ?? name
-    if first.isEmpty { return "Welcome back" }
-    return "Welcome back, \(first)"
+  private func updatedString(at now: Date) -> String {
+    guard let last = viewModel.lastUpdatedAt else { return " " }
+    let seconds = Int(now.timeIntervalSince(last))
+    if seconds < 60 { return "Updated just now" }
+    if seconds < 3_600 {
+      let m = seconds / 60
+      return "Updated \(m)min ago"
+    }
+    if seconds < 86_400 {
+      let h = seconds / 3_600
+      return "Updated \(h)h ago"
+    }
+    let d = seconds / 86_400
+    return "Updated \(d)d ago"
   }
 
   private var cards: [CardData] {

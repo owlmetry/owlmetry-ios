@@ -7,34 +7,39 @@ struct FeedbackCard: View {
 
   var body: some View {
     CardShell(accent: ProjectColor(project: project).base) {
-      VStack(alignment: .leading, spacing: 8) {
-        Text(feedback.message)
-          .font(.subheadline)
-          .foregroundStyle(.primary)
-          .lineLimit(3)
-          .multilineTextAlignment(.leading)
-        HStack(spacing: 6) {
-          if app != nil {
-            AppBadge(app: app, project: project, size: .xs)
+      HStack(alignment: .center, spacing: 10) {
+        VStack(alignment: .leading, spacing: 8) {
+          Text(feedback.message)
+            .font(.subheadline)
+            .foregroundStyle(.primary)
+            .lineLimit(3)
+            .multilineTextAlignment(.leading)
+          HStack(spacing: 6) {
+            if app != nil {
+              AppBadge(app: app, project: project, size: .xs)
+            }
+            if feedback.isDev == true {
+              DevModeBadge(size: .xs)
+            }
+            BillingBadge(properties: feedback.userProperties, size: .xs)
+            AttributionBadge(properties: feedback.userProperties, size: .xs)
           }
-          if feedback.isDev == true {
-            DevModeBadge(size: .xs)
+          HStack(spacing: 10) {
+            Text(submitterLabel)
+              .lineLimit(1)
+              .truncationMode(.middle)
+            if let country = feedback.countryCode {
+              CountryCell(code: country, showCode: false)
+            }
+            Spacer()
+            Label(RelativeDate.shortString(from: feedback.createdAt), systemImage: "clock")
           }
-          BillingBadge(properties: feedback.userProperties, size: .xs)
-          AttributionBadge(properties: feedback.userProperties, size: .xs)
+          .font(.caption2)
+          .foregroundStyle(.secondary)
         }
-        HStack(spacing: 10) {
-          Text(submitterLabel)
-            .lineLimit(1)
-            .truncationMode(.middle)
-          if let country = feedback.countryCode {
-            CountryCell(code: country, showCode: false)
-          }
-          Spacer()
-          Label(RelativeDate.shortString(from: feedback.createdAt), systemImage: "clock")
-        }
-        .font(.caption2)
-        .foregroundStyle(.secondary)
+        Image(systemName: "chevron.right")
+          .font(.caption.weight(.semibold))
+          .foregroundStyle(.tertiary)
       }
     }
   }

@@ -20,17 +20,20 @@ struct StatCard: View {
           .font(.system(size: 12, weight: .medium))
           .foregroundStyle(.secondary)
       }
-      if isLoading {
-        ProgressView()
-          .frame(maxWidth: .infinity, alignment: .leading)
-      } else {
-        Text(value)
-          .font(.system(size: 34, weight: .semibold, design: .default))
-          .monospacedDigit()
-          .lineLimit(1)
-          .minimumScaleFactor(0.6)
-          .foregroundStyle(.primary)
+      Group {
+        if isLoading {
+          ProgressView()
+        } else {
+          Text(value)
+            .font(.system(size: 34, weight: .semibold, design: .default))
+            .monospacedDigit()
+            .lineLimit(1)
+            .minimumScaleFactor(0.6)
+            .foregroundStyle(.primary)
+        }
       }
+      .frame(height: 42, alignment: .leading)
+      .frame(maxWidth: .infinity, alignment: .leading)
     }
     .frame(maxWidth: .infinity, alignment: .leading)
     .padding(.horizontal, 16)
