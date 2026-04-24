@@ -42,6 +42,18 @@ enum IssuesService {
     try await APIClient.shared.get("/v1/projects/\(projectId)/issues/\(issueId)")
   }
 
+  static func postComment(
+    projectId: String,
+    issueId: String,
+    body: String
+  ) async throws -> IssueComment {
+    struct Body: Encodable { let body: String }
+    return try await APIClient.shared.post(
+      "/v1/projects/\(projectId)/issues/\(issueId)/comments",
+      body: Body(body: body)
+    )
+  }
+
   static func updateStatus(
     projectId: String,
     issueId: String,

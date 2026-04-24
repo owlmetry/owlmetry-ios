@@ -7,6 +7,8 @@ struct IssueDetailView: View {
   @StateObject private var viewModel = IssueDetailViewModel()
   @State private var showResolveSheet = false
   @State private var resolveVersion: String = ""
+  @State private var commentDraft: String = ""
+  @FocusState private var commentFieldFocused: Bool
 
   var body: some View {
     ScrollView {
@@ -14,9 +16,19 @@ struct IssueDetailView: View {
         header
         InfoGrid(items: infoItems)
           .padding(.horizontal, 16)
-        if !viewModel.comments.isEmpty {
-          commentsSection
+        if let errorMessage = viewModel.errorMessage {
+          Text(errorMessage)
+            .font(.caption)
+            .foregroundStyle(.red)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(12)
+            .background(
+              RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .fill(Color.red.opacity(0.1))
+            )
+            .padding(.horizontal, 16)
         }
+        commentsSection
         if !viewModel.occurrences.isEmpty {
           occurrencesSection
         }
@@ -91,10 +103,21 @@ struct IssueDetailView: View {
         .foregroundStyle(.secondary)
         .padding(.horizontal, 16)
       VStack(alignment: .leading, spacing: 10) {
+        if viewModel.comments.isEmpty {
+          Text("No comments yet.")
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(12)
+            .background(
+              RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .fill(Theme.cardBackground)
+            )
+        }
         ForEach(viewModel.comments) { comment in
           VStack(alignment: .leading, spacing: 4) {
             HStack {
-              Text(comment.authorName ?? "Unknown")
+              Text(authorLabel(for: comment))
                 .font(.caption.weight(.semibold))
               Spacer()
               Text(RelativeDate.shortString(from: comment.createdAt))
@@ -110,46 +133,67 @@ struct IssueDetailView: View {
               .fill(Theme.cardBackground)
           )
         }
+        commentComposer
       }
       .padding(.horizontal, 16)
     }
   }
 
+  private func authorLabel(for comment: IssueComment) -> String {
+    let emoji = comment.authorType == "agent" ? "🕶️" : "👤"
+    return "\(emoji) \(comment.authorName ?? "Unknown")"
+  }
+
+  private var commentComposer: some View {
+    HStack(alignment: .bottom, spacing: 8) {
+      TextField("Add a comment", text: $commentDraft, axis: .vertical)
+        .lineLimit(1...4)
+        .focused($commentFieldFocused)
+        .textFieldStyle(.plain)
+        .padding(10)
+        .background(
+          RoundedRectangle(cornerRadius: 10, style: .continuous)
+            .fill(Theme.cardBackground)
+        )
+      Button {
+        let body = commentDraft
+        commentFieldFocused = false
+        Task {
+          await viewModel.submitComment(
+            projectId: issue.projectId,
+            issueId: issue.id,
+            body: body
+          )
+          if viewModel.errorMessage == nil {
+            commentDraft = ""
+          }
+        }
+      } label: {
+        if viewModel.isSubmittingComment {
+          ProgressView()
+            .frame(width: 22, height: 22)
+        } else {
+          Image(systemName: "paperplane.fill")
+            .font(.body.weight(.semibold))
+        }
+      }
+      .disabled(commentDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || viewModel.isSubmittingComment)
+      .padding(.bottom, 4)
+    }
+  }
+
   private var occurrencesSection: some View {
     VStack(alignment: .leading, spacing: 8) {
-      Text("Recent occurrences")
+      Text("Occurrences (\(viewModel.occurrences.count))")
         .font(.caption.weight(.semibold))
         .foregroundStyle(.secondary)
         .padding(.horizontal, 16)
       VStack(spacing: 0) {
-        ForEach(viewModel.occurrences) { occurrence in
-          HStack(spacing: 10) {
-            Text(RelativeDate.shortString(from: occurrence.timestamp))
-              .font(.caption2.monospaced())
-              .frame(width: 50, alignment: .leading)
-              .foregroundStyle(.secondary)
-            if let country = occurrence.countryCode {
-              Text(CountryFlag.emoji(for: country))
-            }
-            Text(occurrence.userId ?? "—")
-              .font(.caption2.monospaced())
-              .lineLimit(1)
-              .truncationMode(.middle)
-            Spacer(minLength: 0)
-            if let version = occurrence.appVersion {
-              Text(version)
-                .font(.caption2.monospaced())
-                .foregroundStyle(.secondary)
-            }
-            if let env = occurrence.environment {
-              Text(env)
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-            }
+        ForEach(Array(viewModel.occurrences.enumerated()), id: \.element.id) { index, occurrence in
+          occurrenceRow(occurrence)
+          if index < viewModel.occurrences.count - 1 {
+            Divider()
           }
-          .padding(.horizontal, 12)
-          .padding(.vertical, 8)
-          Divider()
         }
       }
       .background(
@@ -158,6 +202,41 @@ struct IssueDetailView: View {
       )
       .padding(.horizontal, 16)
     }
+  }
+
+  private func occurrenceRow(_ occurrence: IssueOccurrence) -> some View {
+    VStack(alignment: .leading, spacing: 4) {
+      HStack(spacing: 8) {
+        Text(occurrence.userId ?? "—")
+          .font(.caption.monospaced())
+          .lineLimit(1)
+          .truncationMode(.middle)
+        Spacer(minLength: 0)
+        if let country = occurrence.countryCode {
+          Text(CountryFlag.emoji(for: country))
+        }
+      }
+      HStack(spacing: 8) {
+        Text(RelativeDate.shortString(from: occurrence.timestamp))
+          .font(.caption2)
+          .foregroundStyle(.secondary)
+        if let version = occurrence.appVersion {
+          Text("·").font(.caption2).foregroundStyle(.secondary)
+          Text(version)
+            .font(.caption2.monospaced())
+            .foregroundStyle(.secondary)
+        }
+        if let env = occurrence.environment {
+          Text("·").font(.caption2).foregroundStyle(.secondary)
+          Text(env)
+            .font(.caption2)
+            .foregroundStyle(.secondary)
+        }
+        Spacer(minLength: 0)
+      }
+    }
+    .padding(.horizontal, 12)
+    .padding(.vertical, 10)
   }
 
   private func attachmentsSection(_ attachments: [IssueAttachment]) -> some View {
