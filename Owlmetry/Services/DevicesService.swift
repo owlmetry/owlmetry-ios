@@ -51,14 +51,34 @@ enum DevicesService {
 }
 
 enum APNsEnvironment {
-  /// "sandbox" for Debug / TestFlight builds, "production" for App Store.
-  /// We use the entitlements file (aps-environment) to drive APNs gateway
-  /// selection on the server side.
+  /// Reads `aps-environment` from the embedded provisioning profile so the
+  /// reported environment matches the actual signing identity — `#if DEBUG`
+  /// alone lies for Release-config builds signed with a Development cert
+  /// (Xcode dev install of Release), where the token is sandbox but the
+  /// compile flag says production.
   static var current: String {
+    if let parsed = readFromProvisioningProfile() { return parsed }
+    // App Store builds strip embedded.mobileprovision — fall back.
     #if DEBUG
     return "sandbox"
     #else
     return "production"
     #endif
+  }
+
+  private static func readFromProvisioningProfile() -> String? {
+    guard let url = Bundle.main.url(forResource: "embedded", withExtension: "mobileprovision"),
+          let data = try? Data(contentsOf: url),
+          let raw = String(data: data, encoding: .ascii),
+          let keyRange = raw.range(of: "<key>aps-environment</key>") else {
+      return nil
+    }
+    let tail = raw[keyRange.upperBound...]
+    guard let stringStart = tail.range(of: "<string>"),
+          let stringEnd = tail.range(of: "</string>", range: stringStart.upperBound..<tail.endIndex) else {
+      return nil
+    }
+    let value = String(tail[stringStart.upperBound..<stringEnd.lowerBound])
+    return value == "development" ? "sandbox" : "production"
   }
 }
