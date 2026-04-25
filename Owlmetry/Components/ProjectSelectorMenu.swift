@@ -42,6 +42,8 @@ struct ProjectSelectorMenu: View {
             .foregroundStyle(.secondary)
           Text("All projects")
         }
+        Text("(\(appState.projectsForCurrentTeam.count))")
+          .foregroundStyle(.secondary)
         Image(systemName: "chevron.down")
           .font(.caption2)
           .foregroundStyle(.secondary)

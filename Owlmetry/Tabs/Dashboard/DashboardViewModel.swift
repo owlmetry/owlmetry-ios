@@ -11,16 +11,11 @@ final class DashboardViewModel: ObservableObject {
   @Published var metricsCount: Int?
   @Published var funnelsCompletedCount: Int?
   @Published var funnelsStartedCount: Int?
-  @Published var projectCount: Int?
-  @Published var appCount: Int?
   @Published var lastUpdatedAt: Date?
 
   @Published var errorMessage: String?
 
-  func load(teamId: String, projectId: String?, dataMode: DataMode, knownProjectCount: Int, knownAppCount: Int) async {
-    projectCount = knownProjectCount
-    appCount = knownAppCount
-
+  func load(teamId: String, projectId: String?, dataMode: DataMode) async {
     let since = ISODate.isoString(since: 86_400)
 
     async let openIssues = fetchOpenIssuesCount(teamId: teamId, projectId: projectId, dataMode: dataMode)

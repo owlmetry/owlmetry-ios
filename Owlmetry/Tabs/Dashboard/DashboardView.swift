@@ -44,8 +44,10 @@ struct DashboardView: View {
           ProfileAvatarButton(initials: profileInitials, unread: notifications.unreadCount)
         }
       }
-      ToolbarItem(placement: .topBarTrailing) {
-        ProjectSelectorMenu()
+      if appState.projectsForCurrentTeam.count > 1 {
+        ToolbarItem(placement: .topBarTrailing) {
+          ProjectSelectorMenu()
+        }
       }
     }
     .refreshable {
@@ -144,13 +146,6 @@ struct DashboardView: View {
         systemImage: "line.3.horizontal.decrease.circle",
         value: funnelsValue,
         isLoading: viewModel.funnelsCompletedCount == nil
-      ),
-      CardData(
-        id: "projects_apps",
-        label: "Projects · Apps",
-        systemImage: "folder",
-        value: projectsAppsValue,
-        isLoading: viewModel.projectCount == nil
       )
     ]
   }
@@ -159,12 +154,6 @@ struct DashboardView: View {
     guard let completed = viewModel.funnelsCompletedCount else { return "—" }
     let started = viewModel.funnelsStartedCount ?? 0
     return "\(format(completed))/\(format(started))"
-  }
-
-  private var projectsAppsValue: String {
-    let p = viewModel.projectCount ?? appState.projectsForCurrentTeam.count
-    let a = viewModel.appCount ?? appState.apps.count
-    return "\(p) · \(a)"
   }
 
   private func format(_ value: Int?) -> String {
@@ -177,9 +166,7 @@ struct DashboardView: View {
     await viewModel.load(
       teamId: teamId,
       projectId: appState.selectedProjectId,
-      dataMode: appState.dataMode,
-      knownProjectCount: appState.projectsForCurrentTeam.count,
-      knownAppCount: appState.apps.count
+      dataMode: appState.dataMode
     )
   }
 

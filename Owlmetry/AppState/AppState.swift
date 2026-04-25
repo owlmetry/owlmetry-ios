@@ -94,7 +94,10 @@ final class AppState: ObservableObject {
       self.projects = projects.projects
       self.projectsById = Dictionary(uniqueKeysWithValues: projects.projects.map { ($0.id, $0) })
       self.apps = apps.apps
-      if let selected = selectedProjectId, projectsById[selected] == nil {
+      let teamProjects = projects.projects.filter { $0.teamId == teamId }
+      if teamProjects.count == 1 {
+        selectedProjectId = teamProjects[0].id
+      } else if let selected = selectedProjectId, projectsById[selected] == nil {
         selectedProjectId = nil
       }
     } catch let error as APIError {
