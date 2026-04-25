@@ -14,7 +14,8 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
     // Cold-start tap: defer until a scene is attached to consume the link.
     if let userInfo = launchOptions?[.remoteNotification] as? [AnyHashable: Any],
        let link = userInfo["link"] as? String {
-      Task { @MainActor in DeepLinkRouter.shared.handle(link) }
+      let data = userInfo["data"] as? [String: Any]
+      Task { @MainActor in DeepLinkRouter.shared.handle(link, data: data) }
     }
     return true
   }
@@ -57,7 +58,8 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
   ) {
     let userInfo = response.notification.request.content.userInfo
     if let link = userInfo["link"] as? String {
-      Task { @MainActor in DeepLinkRouter.shared.handle(link) }
+      let data = userInfo["data"] as? [String: Any]
+      Task { @MainActor in DeepLinkRouter.shared.handle(link, data: data) }
     }
     completionHandler()
   }

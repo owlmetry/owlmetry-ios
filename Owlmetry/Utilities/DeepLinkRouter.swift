@@ -3,37 +3,56 @@ import Foundation
 import SwiftUI
 
 /// Parsed deep link target. Mirrors the server's `link` strings on
-/// notifications — `/dashboard/issues/<id>` → `.issue(id)`, etc. Unknown
-/// shapes fall through as `.unknown(path)` so the UI can show a fallback.
+/// notifications, with project context pulled from the APNs `data` payload
+/// when present.
 enum DeepLink: Equatable {
   case issue(id: String, projectId: String?)
   case feedback(id: String, projectId: String?)
+  case issuesList(projectId: String?)
+  case feedbackList(projectId: String?)
   case notifications
   case unknown(path: String)
 
-  static func parse(_ raw: String) -> DeepLink {
+  static func parse(_ raw: String, data: [String: Any]? = nil) -> DeepLink {
+    let projectId = (data?["project_id"] as? String).flatMap { $0.isEmpty ? nil : $0 }
     let trimmed = raw.split(separator: "?").first.map(String.init) ?? raw
     let parts = trimmed.split(separator: "/").map(String.init)
-    // Expected shapes:
-    //   /dashboard/issues/<id>
-    //   /dashboard/feedback/<id>
-    //   /dashboard/notifications
-    if parts.count >= 3, parts[0] == "dashboard" {
+    if parts.count >= 2, parts[0] == "dashboard" {
       switch parts[1] {
-      case "issues" where parts.count >= 3:
-        return .issue(id: parts[2], projectId: nil)
-      case "feedback" where parts.count >= 3:
-        return .feedback(id: parts[2], projectId: nil)
+      case "issues":
+        if parts.count >= 3 {
+          return .issue(id: parts[2], projectId: projectId)
+        }
+        return .issuesList(projectId: projectId)
+      case "feedback":
+        if parts.count >= 3 {
+          return .feedback(id: parts[2], projectId: projectId)
+        }
+        return .feedbackList(projectId: projectId)
+      case "notifications":
+        return .notifications
       default:
         break
       }
     }
-    if parts.count >= 2, parts[0] == "dashboard", parts[1] == "notifications" {
-      return .notifications
-    }
     return .unknown(path: raw)
   }
 }
+
+/// Hashable routes pushed onto per-tab NavigationStacks when a deep link
+/// arrives. The matching `.navigationDestination(for:)` modifiers in
+/// `MainTabView` resolve them to the loader views that fetch by id.
+struct IssueDeepLinkRoute: Hashable {
+  let id: String
+  let projectId: String
+}
+
+struct FeedbackDeepLinkRoute: Hashable {
+  let id: String
+  let projectId: String
+}
+
+struct NotificationsDeepLinkRoute: Hashable {}
 
 /// App-wide singleton observed by `MainTabView` to drive tab + nav-stack
 /// changes when a notification or universal link arrives. Producers
@@ -47,8 +66,8 @@ final class DeepLinkRouter: ObservableObject {
 
   private init() {}
 
-  func handle(_ link: String) {
-    pendingDeepLink = DeepLink.parse(link)
+  func handle(_ link: String, data: [String: Any]? = nil) {
+    pendingDeepLink = DeepLink.parse(link, data: data)
   }
 
   func consume() -> DeepLink? {

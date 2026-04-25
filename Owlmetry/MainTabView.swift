@@ -3,8 +3,9 @@ import UIKit
 
 struct MainTabView: View {
   @State private var selection: Tab = .dashboard
-  @State private var pendingIssueId: String?
-  @State private var pendingFeedbackId: String?
+  @State private var dashboardPath = NavigationPath()
+  @State private var issuesPath = NavigationPath()
+  @State private var feedbackPath = NavigationPath()
   @StateObject private var router = DeepLinkRouter.shared
 
   init() {
@@ -43,15 +44,30 @@ struct MainTabView: View {
         selection = newValue
       }
     )) {
-      NavigationStack { DashboardView() }
+      NavigationStack(path: $dashboardPath) {
+        DashboardView()
+          .navigationDestination(for: NotificationsDeepLinkRoute.self) { _ in
+            NotificationsListView()
+          }
+      }
         .tabItem { Image(systemName: "house") }
         .tag(Tab.dashboard)
 
-      NavigationStack { IssuesListView() }
+      NavigationStack(path: $issuesPath) {
+        IssuesListView()
+          .navigationDestination(for: IssueDeepLinkRoute.self) { route in
+            IssueDetailLoaderView(projectId: route.projectId, issueId: route.id)
+          }
+      }
         .tabItem { Image(systemName: "ant") }
         .tag(Tab.issues)
 
-      NavigationStack { FeedbackListView() }
+      NavigationStack(path: $feedbackPath) {
+        FeedbackListView()
+          .navigationDestination(for: FeedbackDeepLinkRoute.self) { route in
+            FeedbackDetailLoaderView(projectId: route.projectId, feedbackId: route.id)
+          }
+      }
         .tabItem { Image(systemName: "bubble.left") }
         .tag(Tab.feedback)
 
@@ -65,20 +81,39 @@ struct MainTabView: View {
     }
     .onChange(of: router.pendingDeepLink) { _, link in
       guard let link else { return }
-      switch link {
-      case .issue:
-        selection = .issues
-      case .feedback:
-        selection = .feedback
-      case .notifications:
-        // Notifications are accessed via Profile from Dashboard
-        selection = .dashboard
-      case .unknown:
-        break
-      }
-      // Clear after handling — the destination tab can read the original
-      // link via the router if it needs the specific id.
+      handle(link)
       router.pendingDeepLink = nil
+    }
+  }
+
+  private func handle(_ link: DeepLink) {
+    switch link {
+    case .issue(let id, let projectId):
+      selection = .issues
+      issuesPath = NavigationPath()
+      if let projectId {
+        issuesPath.append(IssueDeepLinkRoute(id: id, projectId: projectId))
+      }
+      // No projectId — leave on the list. Server began including project_id
+      // in `data` so this only happens for legacy in-flight pushes.
+    case .feedback(let id, let projectId):
+      selection = .feedback
+      feedbackPath = NavigationPath()
+      if let projectId {
+        feedbackPath.append(FeedbackDeepLinkRoute(id: id, projectId: projectId))
+      }
+    case .issuesList:
+      selection = .issues
+      issuesPath = NavigationPath()
+    case .feedbackList:
+      selection = .feedback
+      feedbackPath = NavigationPath()
+    case .notifications:
+      selection = .dashboard
+      dashboardPath = NavigationPath()
+      dashboardPath.append(NotificationsDeepLinkRoute())
+    case .unknown:
+      break
     }
   }
 }
