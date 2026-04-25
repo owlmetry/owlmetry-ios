@@ -6,9 +6,16 @@ struct MetricDefinition: Codable, Identifiable, Equatable, Hashable {
   let name: String
   let slug: String
   let description: String?
-  let aggregationRules: [String: String]?
+  let aggregationRules: MetricAggregationRules?
   let createdAt: String
   let updatedAt: String?
+}
+
+struct MetricAggregationRules: Codable, Equatable, Hashable {
+  let durationField: String?
+  let sizeField: String?
+  let errorGroupFields: [String]?
+  let lifecycle: Bool
 }
 
 struct MetricAggregation: Codable, Equatable, Hashable {
