@@ -5,20 +5,28 @@ struct MetricsListView: View {
   @EnvironmentObject private var appState: AppState
   @StateObject private var viewModel = MetricsListViewModel()
 
+  var projectIdOverride: String? = nil
+
   private let columns: [GridItem] = [
     GridItem(.adaptive(minimum: 160, maximum: 240), spacing: 12)
   ]
+
+  private var effectiveProjectId: String? {
+    projectIdOverride ?? appState.selectedProjectId
+  }
 
   var body: some View {
     content
       .navigationTitle("Metrics")
       .navigationBarTitleDisplayMode(.large)
       .toolbar {
-        ToolbarItem(placement: .topBarTrailing) { ProjectSelectorMenu() }
+        if projectIdOverride == nil {
+          ToolbarItem(placement: .topBarTrailing) { ProjectSelectorMenu() }
+        }
       }
-      .refreshable { await viewModel.load(projectId: appState.selectedProjectId) }
-      .task(id: appState.selectedProjectId) {
-        await viewModel.load(projectId: appState.selectedProjectId)
+      .refreshable { await viewModel.load(projectId: effectiveProjectId) }
+      .task(id: effectiveProjectId) {
+        await viewModel.load(projectId: effectiveProjectId)
       }
       .toolbar(.hidden, for: .tabBar)
       .owlScreen("MetricsList")
@@ -26,7 +34,7 @@ struct MetricsListView: View {
 
   @ViewBuilder
   private var content: some View {
-    if appState.selectedProjectId == nil {
+    if effectiveProjectId == nil {
       EmptyState(
         systemImage: "square.grid.2x2",
         title: "Pick a project",
@@ -40,7 +48,7 @@ struct MetricsListView: View {
         EmptyState(systemImage: "chart.bar", title: "No metrics yet", subtitle: "Metrics defined in this project will appear here.")
       case .error(let message):
         ErrorState(message: message) {
-          Task { await viewModel.load(projectId: appState.selectedProjectId) }
+          Task { await viewModel.load(projectId: effectiveProjectId) }
         }
       case .loaded:
         ScrollView {

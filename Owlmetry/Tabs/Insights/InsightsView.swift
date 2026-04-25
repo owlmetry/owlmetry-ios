@@ -6,30 +6,19 @@ struct InsightsView: View {
 
   var body: some View {
     ScrollView {
-      VStack(spacing: 12) {
-        NavigationLink {
-          MetricsListView()
-        } label: {
-          InsightTile(
-            title: "Metrics",
-            subtitle: "Track start / complete / fail / cancel / record events with durations and success rates.",
-            systemImage: "chart.bar",
-            tone: Color.blue
+      LazyVStack(spacing: 20) {
+        if displayProjects.isEmpty {
+          EmptyState(
+            systemImage: "square.grid.2x2",
+            title: "No projects yet",
+            subtitle: "Create a project to start tracking metrics and funnels."
           )
+          .padding(.top, 40)
+        } else {
+          ForEach(displayProjects) { project in
+            ProjectInsightsSection(project: project)
+          }
         }
-        .buttonStyle(.plain)
-
-        NavigationLink {
-          FunnelsListView()
-        } label: {
-          InsightTile(
-            title: "Funnels",
-            subtitle: "See where users drop off across a sequence of steps.",
-            systemImage: "line.3.horizontal.decrease.circle",
-            tone: Color.purple
-          )
-        }
-        .buttonStyle(.plain)
       }
       .padding(.horizontal, 16)
       .padding(.vertical, 12)
@@ -41,49 +30,61 @@ struct InsightsView: View {
     }
     .owlScreen("Insights")
   }
+
+  private var displayProjects: [Project] {
+    if let selected = appState.selectedProject {
+      return [selected]
+    }
+    return appState.projectsForCurrentTeam
+  }
 }
 
-private struct InsightTile: View {
-  let title: String
-  let subtitle: String
-  let systemImage: String
-  let tone: Color
+private struct ProjectInsightsSection: View {
+  let project: Project
 
   var body: some View {
-    HStack(alignment: .top, spacing: 14) {
-      ZStack {
-        RoundedRectangle(cornerRadius: 10, style: .continuous)
-          .fill(tone.opacity(0.12))
-        Image(systemName: systemImage)
-          .font(.system(size: 20, weight: .semibold))
-          .foregroundStyle(tone)
-      }
-      .frame(width: 44, height: 44)
-
-      VStack(alignment: .leading, spacing: 4) {
-        Text(title)
+    VStack(alignment: .leading, spacing: 10) {
+      HStack(spacing: 8) {
+        Circle()
+          .fill(ProjectColor(project: project).base)
+          .frame(width: 8, height: 8)
+        Text(project.name)
           .font(.headline)
           .foregroundStyle(.primary)
-        Text(subtitle)
-          .font(.footnote)
-          .foregroundStyle(.secondary)
-          .fixedSize(horizontal: false, vertical: true)
       }
-      Spacer(minLength: 0)
-      Image(systemName: "chevron.right")
-        .font(.caption.weight(.semibold))
-        .foregroundStyle(.secondary)
-        .padding(.top, 12)
+      .padding(.horizontal, 4)
+
+      VStack(spacing: 12) {
+        NavigationLink {
+          MetricsListView(projectIdOverride: project.id)
+        } label: {
+          NavigableCard(accent: ProjectColor(project: project).base) {
+            Label("Metrics", systemImage: "chart.bar")
+              .font(.headline)
+              .foregroundStyle(.primary)
+            Text("Track start / complete / fail / cancel / record events with durations and success rates.")
+              .font(.footnote)
+              .foregroundStyle(.secondary)
+              .fixedSize(horizontal: false, vertical: true)
+          }
+        }
+        .buttonStyle(.plain)
+
+        NavigationLink {
+          FunnelsListView(projectIdOverride: project.id)
+        } label: {
+          NavigableCard(accent: ProjectColor(project: project).base) {
+            Label("Funnels", systemImage: "line.3.horizontal.decrease.circle")
+              .font(.headline)
+              .foregroundStyle(.primary)
+            Text("See where users drop off across a sequence of steps.")
+              .font(.footnote)
+              .foregroundStyle(.secondary)
+              .fixedSize(horizontal: false, vertical: true)
+          }
+        }
+        .buttonStyle(.plain)
+      }
     }
-    .padding(14)
-    .frame(maxWidth: .infinity, alignment: .leading)
-    .background(
-      RoundedRectangle(cornerRadius: 14, style: .continuous)
-        .fill(Theme.cardBackground)
-    )
-    .overlay(
-      RoundedRectangle(cornerRadius: 14, style: .continuous)
-        .stroke(Theme.cardBorder, lineWidth: 1)
-    )
   }
 }
