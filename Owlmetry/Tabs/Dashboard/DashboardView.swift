@@ -2,9 +2,10 @@ import Owlmetry
 import SwiftUI
 
 struct DashboardView: View {
+  @EnvironmentObject private var auth: AuthViewModel
   @EnvironmentObject private var appState: AppState
   @StateObject private var viewModel = DashboardViewModel()
-  @State private var showSettings = false
+  @StateObject private var notifications = NotificationsListViewModel()
 
   private let columns: [GridItem] = [
     GridItem(.adaptive(minimum: 150, maximum: 240), spacing: 12)
@@ -39,26 +40,34 @@ struct DashboardView: View {
     .navigationBarTitleDisplayMode(.large)
     .toolbar {
       ToolbarItem(placement: .topBarLeading) {
-        Button {
-          showSettings = true
-        } label: {
-          Image(systemName: "gearshape")
+        NavigationLink(destination: ProfileView()) {
+          ProfileAvatarButton(initials: profileInitials, unread: notifications.unreadCount)
         }
       }
       ToolbarItem(placement: .topBarTrailing) {
         ProjectSelectorMenu()
       }
     }
-    .sheet(isPresented: $showSettings) {
-      SettingsSheet()
-    }
     .refreshable {
       await reload()
     }
     .autoRefresh(id: refreshKey, every: 30) {
       await reload()
+      await notifications.refreshUnread()
+    }
+    .task {
+      await notifications.refreshUnread()
     }
     .owlScreen("Dashboard")
+  }
+
+  private var profileInitials: String {
+    let name = auth.currentUser?.name ?? auth.currentUser?.email ?? "?"
+    let parts = name.split(separator: " ").prefix(2)
+    if parts.count >= 2 {
+      return parts.map { $0.prefix(1) }.joined().uppercased()
+    }
+    return String(name.prefix(2)).uppercased()
   }
 
   private var refreshKey: String {

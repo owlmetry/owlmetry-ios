@@ -1,0 +1,15 @@
+{
+  "originHash" : "679ea627c56a8d9267f953fdad82f8d2ee4ce69323848a61a25a69c10fe4ede0",
+  "pins" : [
+    {
+      "identity" : "owlmetry-swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/owlmetry/owlmetry-swift.git",
+      "state" : {
+        "revision" : "10085a09e3ef100833dc952eb54e5195277c6980",
+        "version" : "1.0.0"
+      }
+    }
+  ],
+  "version" : 3
+}

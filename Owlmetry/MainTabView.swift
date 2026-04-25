@@ -3,6 +3,9 @@ import UIKit
 
 struct MainTabView: View {
   @State private var selection: Tab = .dashboard
+  @State private var pendingIssueId: String?
+  @State private var pendingFeedbackId: String?
+  @StateObject private var router = DeepLinkRouter.shared
 
   init() {
     let itemAppearance = UITabBarItemAppearance()
@@ -59,6 +62,23 @@ struct MainTabView: View {
       NavigationStack { UsersListView() }
         .tabItem { Image(systemName: "person.2") }
         .tag(Tab.users)
+    }
+    .onChange(of: router.pendingDeepLink) { _, link in
+      guard let link else { return }
+      switch link {
+      case .issue:
+        selection = .issues
+      case .feedback:
+        selection = .feedback
+      case .notifications:
+        // Notifications are accessed via Profile from Dashboard
+        selection = .dashboard
+      case .unknown:
+        break
+      }
+      // Clear after handling — the destination tab can read the original
+      // link via the router if it needs the specific id.
+      router.pendingDeepLink = nil
     }
   }
 }

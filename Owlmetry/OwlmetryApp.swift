@@ -3,6 +3,7 @@ import SwiftUI
 
 @main
 struct OwlmetryApp: App {
+  @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
   @StateObject private var auth = AuthViewModel.shared
   @StateObject private var appState = AppState()
 
