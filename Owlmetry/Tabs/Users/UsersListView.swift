@@ -54,48 +54,43 @@ struct UsersListView: View {
     case .error(let message) where viewModel.users.isEmpty:
       ErrorState(message: message) { Task { await reload() } }
     default:
-      List {
+      ScrollView {
         if viewModel.users.isEmpty {
           EmptyState(systemImage: "person.2", title: "No users yet", subtitle: "Users from recent sessions will appear here.")
-            .listRowBackground(Color.clear)
-            .listRowSeparator(.hidden)
         } else {
-          ForEach(viewModel.users) { user in
-            NavigationLink {
-              UserDetailView(user: user)
-            } label: {
-              UserCard(
-                user: user,
-                apps: (user.apps ?? []).compactMap { info in appState.apps.first(where: { $0.id == info.appId }) },
-                projectsById: appState.projectsById
-              )
+          LazyVStack(spacing: 8) {
+            ForEach(viewModel.users) { user in
+              NavigationLink {
+                UserDetailView(user: user)
+              } label: {
+                UserCard(
+                  user: user,
+                  apps: (user.apps ?? []).compactMap { info in appState.apps.first(where: { $0.id == info.appId }) },
+                  projectsById: appState.projectsById
+                )
+              }
+              .buttonStyle(.plain)
+              .task {
+                guard let teamId = appState.currentTeam?.id else { return }
+                await viewModel.loadMoreIfNeeded(
+                  teamId: teamId,
+                  projectId: appState.selectedProjectId,
+                  dataMode: appState.dataMode,
+                  currentUser: user
+                )
+              }
             }
-            .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
-            .listRowSeparator(.hidden)
-            .listRowBackground(Color.clear)
-            .buttonStyle(.plain)
-            .task {
-              guard let teamId = appState.currentTeam?.id else { return }
-              await viewModel.loadMoreIfNeeded(
-                teamId: teamId,
-                projectId: appState.selectedProjectId,
-                dataMode: appState.dataMode,
-                currentUser: user
-              )
-            }
-          }
-          if viewModel.isLoadingMore {
-            HStack {
-              Spacer()
+            if viewModel.isLoadingMore {
               ProgressView()
-              Spacer()
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 8)
             }
-            .listRowBackground(Color.clear)
-            .listRowSeparator(.hidden)
           }
+          .padding(.horizontal, 16)
+          .padding(.top, 4)
+          .padding(.bottom, 8)
         }
       }
-      .listStyle(.plain)
     }
   }
 
