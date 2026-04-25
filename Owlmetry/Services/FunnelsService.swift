@@ -8,17 +8,14 @@ enum FunnelsService {
 
   static func analytics(
     slug: String,
-    teamId: String?,
-    projectId: String?,
+    projectId: String,
     since: String?,
     until: String? = nil,
     dataMode: DataMode
   ) async throws -> FunnelAnalytics {
     let response: FunnelAnalyticsResponse = try await APIClient.shared.get(
-      "/v1/funnels/\(slug)",
+      "/v1/projects/\(projectId)/funnels/\(slug)/query",
       query: [
-        "team_id": teamId,
-        "project_id": projectId,
         "since": since,
         "until": until,
         "data_mode": dataMode.rawValue

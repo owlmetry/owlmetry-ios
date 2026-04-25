@@ -101,6 +101,7 @@ final class AppState: ObservableObject {
       loadError = error.errorDescription
       Owl.error("appstate.load_projects_and_apps.failed", attributes: ["error": "\(error)"])
     } catch {
+      if error.isCancellation { return }
       loadError = error.localizedDescription
       Owl.error("appstate.load_projects_and_apps.failed", attributes: ["error": "\(error)"])
     }

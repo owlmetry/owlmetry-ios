@@ -52,6 +52,7 @@ final class FeedbackListViewModel: ObservableObject {
       state = .error(error.errorDescription ?? "Failed to load feedback")
       Owl.error("feedback.list.failed", attributes: ["error": "\(error)"])
     } catch {
+      if error.isCancellation { return }
       state = .error(error.localizedDescription)
       Owl.error("feedback.list.failed", attributes: ["error": "\(error)"])
     }

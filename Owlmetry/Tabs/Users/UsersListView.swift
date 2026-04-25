@@ -66,7 +66,7 @@ struct UsersListView: View {
             } label: {
               UserCard(
                 user: user,
-                apps: (user.apps ?? []).compactMap { info in appState.apps.first(where: { $0.id == info.id }) },
+                apps: (user.apps ?? []).compactMap { info in appState.apps.first(where: { $0.id == info.appId }) },
                 projectsById: appState.projectsById
               )
             }

@@ -54,8 +54,8 @@ struct UserDetailView: View {
       .init(label: "First Seen", value: RelativeDate.string(from: user.firstSeenAt)),
       .init(label: "Last Seen", value: RelativeDate.string(from: user.lastSeenAt))
     ]
-    if let claimed = user.claimedFrom {
-      items.append(.init(label: "Claimed From", value: claimed, monospaced: true))
+    if let claimed = user.claimedFrom, !claimed.isEmpty {
+      items.append(.init(label: "Claimed From", value: claimed.joined(separator: ", "), monospaced: true))
     }
     return items
   }
@@ -93,13 +93,14 @@ struct UserDetailView: View {
         .foregroundStyle(.secondary)
         .padding(.horizontal, 16)
       VStack(spacing: 0) {
-        ForEach(apps, id: \.id) { app in
-          let appProject = app.projectId.flatMap { appState.projectsById[$0] }
+        ForEach(apps) { app in
+          let knownApp = appState.apps.first(where: { $0.id == app.appId })
+          let appProject = knownApp.flatMap { appState.projectsById[$0.projectId] }
           HStack(spacing: 8) {
-            if let platform = app.platform {
+            if let platform = knownApp?.platform {
               Text(platform.emoji)
             }
-            Text(app.name).font(.footnote.weight(.medium))
+            Text(app.appName).font(.footnote.weight(.medium))
             Spacer()
             if let lastSeenAt = app.lastSeenAt {
               Text(RelativeDate.shortString(from: lastSeenAt))

@@ -75,7 +75,7 @@ struct MetricDetailView: View {
       summaryPill(label: "Complete", value: aggregation.completeCount, color: Theme.Phase.color(for: .complete))
       summaryPill(label: "Fail", value: aggregation.failCount, color: Theme.Phase.color(for: .fail))
       if let rate = aggregation.successRate {
-        summaryPill(label: "Success", value: nil, text: "\(Int(rate * 100))%", color: .green)
+        summaryPill(label: "Success", value: nil, text: "\(Int(rate))%", color: .green)
       }
     }
   }

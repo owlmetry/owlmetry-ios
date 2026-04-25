@@ -17,7 +17,6 @@ final class FunnelDetailViewModel: ObservableObject {
     do {
       analytics = try await FunnelsService.analytics(
         slug: slug,
-        teamId: teamId,
         projectId: projectId,
         since: since,
         dataMode: dataMode
@@ -26,6 +25,7 @@ final class FunnelDetailViewModel: ObservableObject {
       errorMessage = error.errorDescription
       Owl.error("funnel.detail.load.failed", attributes: ["error": "\(error)", "slug": slug])
     } catch {
+      if error.isCancellation { return }
       errorMessage = error.localizedDescription
       Owl.error("funnel.detail.load.failed", attributes: ["error": "\(error)", "slug": slug])
     }

@@ -20,7 +20,7 @@ enum UsersService {
     limit: Int = 40
   ) async throws -> UsersListDTO {
     try await APIClient.shared.get(
-      "/v1/users",
+      "/v1/app-users",
       query: [
         "team_id": teamId,
         "project_id": projectId,

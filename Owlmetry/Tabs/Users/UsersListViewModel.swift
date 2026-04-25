@@ -104,6 +104,7 @@ final class UsersListViewModel: ObservableObject {
       state = .error(error.errorDescription ?? "Failed to load users")
       Owl.error("users.list.failed", attributes: ["error": "\(error)"])
     } catch {
+      if error.isCancellation { return }
       state = .error(error.localizedDescription)
       Owl.error("users.list.failed", attributes: ["error": "\(error)"])
     }
@@ -129,6 +130,7 @@ final class UsersListViewModel: ObservableObject {
       self.cursor = dto.cursor
       hasMore = dto.hasMore ?? false
     } catch {
+      if error.isCancellation { return }
       Owl.error("users.list.load_more.failed", attributes: ["error": "\(error)"])
     }
   }

@@ -45,6 +45,8 @@ final class DashboardViewModel: ObservableObject {
       funnelsStartedCount = r.started
     }
 
+    if Task.isCancelled { return }
+
     let allFailed = openIssuesResult == nil
       && eventsResult == nil
       && metricsResult == nil
@@ -71,7 +73,9 @@ final class DashboardViewModel: ObservableObject {
       )
       return dto.issues.filter { IssueStatus.openStatuses.contains($0.status) }.count
     } catch {
-      Owl.error("dashboard.load.failed", attributes: ["kind": "issues", "error": "\(error)"])
+      if !error.isCancellation {
+        Owl.error("dashboard.load.failed", attributes: ["kind": "issues", "error": "\(error)"])
+      }
       return nil
     }
   }
@@ -80,7 +84,9 @@ final class DashboardViewModel: ObservableObject {
     do {
       return try await EventsService.count(teamId: teamId, projectId: projectId, since: since, dataMode: dataMode)
     } catch {
-      Owl.error("dashboard.load.failed", attributes: ["kind": "events", "error": "\(error)"])
+      if !error.isCancellation {
+        Owl.error("dashboard.load.failed", attributes: ["kind": "events", "error": "\(error)"])
+      }
       return nil
     }
   }
@@ -90,7 +96,9 @@ final class DashboardViewModel: ObservableObject {
       let r = try await MetricsService.completionsCount(teamId: teamId, projectId: projectId, since: since, dataMode: dataMode)
       return r.count
     } catch {
-      Owl.error("dashboard.load.failed", attributes: ["kind": "metrics", "error": "\(error)"])
+      if !error.isCancellation {
+        Owl.error("dashboard.load.failed", attributes: ["kind": "metrics", "error": "\(error)"])
+      }
       return nil
     }
   }
@@ -99,7 +107,9 @@ final class DashboardViewModel: ObservableObject {
     do {
       return try await FunnelsService.completionsCount(teamId: teamId, projectId: projectId, since: since, dataMode: dataMode)
     } catch {
-      Owl.error("dashboard.load.failed", attributes: ["kind": "funnels", "error": "\(error)"])
+      if !error.isCancellation {
+        Owl.error("dashboard.load.failed", attributes: ["kind": "funnels", "error": "\(error)"])
+      }
       return nil
     }
   }

@@ -10,7 +10,7 @@ struct FunnelConversionChart: View {
     } else {
       Chart(analytics.steps) { step in
         BarMark(
-          x: .value("Users", step.uniqueUsers ?? step.count ?? 0),
+          x: .value("Users", step.uniqueUsers),
           y: .value("Step", displayName(for: step))
         )
         .foregroundStyle(Color.accentColor.gradient)
@@ -26,15 +26,13 @@ struct FunnelConversionChart: View {
   }
 
   private func displayName(for step: FunnelStepAnalytics) -> String {
-    if let order = step.order { return "\(order + 1). \(step.name)" }
-    return step.name
+    "\(step.stepIndex + 1). \(step.stepName)"
   }
 
   private func annotation(for step: FunnelStepAnalytics) -> String {
-    let users = step.uniqueUsers ?? step.count ?? 0
     if let rate = step.conversionFromPrevious {
-      return "\(users) · \(Int(rate * 100))%"
+      return "\(step.uniqueUsers) · \(Int(rate * 100))%"
     }
-    return "\(users)"
+    return "\(step.uniqueUsers)"
   }
 }

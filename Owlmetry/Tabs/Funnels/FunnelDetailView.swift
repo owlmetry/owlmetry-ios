@@ -104,13 +104,11 @@ struct FunnelDetailView: View {
         ForEach(analytics.steps) { step in
           HStack {
             VStack(alignment: .leading, spacing: 2) {
-              Text(step.name).font(.footnote.weight(.medium))
+              Text(step.stepName).font(.footnote.weight(.medium))
               HStack(spacing: 6) {
-                if let users = step.uniqueUsers {
-                  Label("\(users)", systemImage: "person.2")
-                }
-                if let dropOff = step.dropOff, dropOff > 0 {
-                  Label("\(dropOff) drop off", systemImage: "arrow.down.right")
+                Label("\(step.uniqueUsers)", systemImage: "person.2")
+                if step.dropOffCount > 0 {
+                  Label("\(step.dropOffCount) drop off", systemImage: "arrow.down.right")
                     .foregroundStyle(.orange)
                 }
               }
@@ -118,11 +116,9 @@ struct FunnelDetailView: View {
               .foregroundStyle(.secondary)
             }
             Spacer()
-            if let rate = step.conversionFromStart {
-              Text("\(Int(rate * 100))%")
-                .font(.footnote.monospacedDigit().weight(.semibold))
-                .foregroundStyle(.primary)
-            }
+            Text("\(Int(step.percentage))%")
+              .font(.footnote.monospacedDigit().weight(.semibold))
+              .foregroundStyle(.primary)
           }
           .padding(.horizontal, 12)
           .padding(.vertical, 10)

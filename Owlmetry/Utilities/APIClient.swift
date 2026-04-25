@@ -1,6 +1,14 @@
 import Foundation
 import Owlmetry
 
+extension Error {
+  var isCancellation: Bool {
+    if self is CancellationError { return true }
+    if let urlError = self as? URLError, urlError.code == .cancelled { return true }
+    return false
+  }
+}
+
 enum APIError: Error, LocalizedError {
   case http(status: Int, message: String)
   case decoding(Error)
@@ -105,6 +113,9 @@ struct APIClient {
     let response: URLResponse
     do {
       (data, response) = try await session.data(for: req)
+    } catch let urlError as URLError where urlError.code == .cancelled {
+      op.complete(attributes: ["status": "cancelled"])
+      throw CancellationError()
     } catch {
       op.fail(error: "\(error)", attributes: ["kind": "transport"])
       throw APIError.transport(error)

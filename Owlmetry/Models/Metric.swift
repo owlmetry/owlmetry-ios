@@ -24,18 +24,23 @@ struct MetricAggregation: Codable, Equatable, Hashable {
   let durationP99Ms: Double?
   let successRate: Double?
   let uniqueUsers: Int?
-  let errorBreakdown: [String: Int]?
+  let errorBreakdown: [MetricErrorBreakdownEntry]?
   let groups: [MetricGroup]?
+}
+
+struct MetricErrorBreakdownEntry: Codable, Equatable, Hashable {
+  let error: String
+  let count: Int
 }
 
 struct MetricGroup: Codable, Equatable, Hashable {
   let key: String
+  let value: String?
   let totalCount: Int?
   let completeCount: Int?
   let failCount: Int?
   let successRate: Double?
   let durationAvgMs: Double?
-  let uniqueUsers: Int?
 }
 
 struct MetricAggregationResponse: Decodable {
@@ -45,7 +50,7 @@ struct MetricAggregationResponse: Decodable {
 
 struct StoredMetricEvent: Codable, Identifiable, Equatable, Hashable {
   let id: String
-  let slug: String
+  let metricSlug: String
   let phase: MetricPhase
   let trackingId: String?
   let userId: String?
@@ -54,7 +59,7 @@ struct StoredMetricEvent: Codable, Identifiable, Equatable, Hashable {
   let appVersion: String?
   let environment: String?
   let durationMs: Double?
-  let errorMessage: String?
+  let error: String?
   let timestamp: String
 }
 

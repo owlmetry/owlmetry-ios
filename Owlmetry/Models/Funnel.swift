@@ -13,10 +13,9 @@ struct FunnelDefinition: Codable, Identifiable, Equatable, Hashable {
 
 struct FunnelStep: Codable, Identifiable, Equatable, Hashable {
   let name: String
-  let order: Int?
   let eventFilter: FunnelStepFilter?
 
-  var id: String { "\(order ?? 0)-\(name)" }
+  var id: String { name }
 }
 
 struct FunnelStepFilter: Codable, Equatable, Hashable {
@@ -25,22 +24,45 @@ struct FunnelStepFilter: Codable, Equatable, Hashable {
 }
 
 struct FunnelAnalytics: Codable, Equatable, Hashable {
-  let totalStarts: Int?
-  let totalCompletions: Int?
-  let conversionRate: Double?
+  let funnel: FunnelDefinition?
+  let mode: String?
+  let totalUsers: Int?
   let steps: [FunnelStepAnalytics]
+  let breakdown: [FunnelBreakdownGroup]?
+
+  var totalStarts: Int? { steps.first?.uniqueUsers }
+  var totalCompletions: Int? { steps.last?.uniqueUsers }
+  var conversionRate: Double? {
+    guard let starts = totalStarts, starts > 0, let completions = totalCompletions else { return nil }
+    return Double(completions) / Double(starts)
+  }
 }
 
 struct FunnelStepAnalytics: Codable, Equatable, Hashable, Identifiable {
-  let name: String
-  let order: Int?
-  let uniqueUsers: Int?
-  let count: Int?
-  let dropOff: Int?
-  let conversionFromPrevious: Double?
-  let conversionFromStart: Double?
+  let stepIndex: Int
+  let stepName: String
+  let uniqueUsers: Int
+  let percentage: Double
+  let dropOffCount: Int
+  let dropOffPercentage: Double
 
-  var id: String { "\(order ?? 0)-\(name)" }
+  var id: String { "\(stepIndex)-\(stepName)" }
+  var name: String { stepName }
+  var order: Int? { stepIndex }
+  var count: Int? { uniqueUsers }
+  var dropOff: Int? { dropOffCount }
+  var conversionFromStart: Double? { percentage / 100 }
+  var conversionFromPrevious: Double? {
+    let survival = 100 - dropOffPercentage
+    return stepIndex == 0 ? nil : survival / 100
+  }
+}
+
+struct FunnelBreakdownGroup: Codable, Equatable, Hashable {
+  let key: String
+  let value: String
+  let totalUsers: Int
+  let steps: [FunnelStepAnalytics]
 }
 
 struct FunnelAnalyticsResponse: Decodable {

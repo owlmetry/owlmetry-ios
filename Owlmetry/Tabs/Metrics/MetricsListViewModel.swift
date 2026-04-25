@@ -21,6 +21,7 @@ final class MetricsListViewModel: ObservableObject {
       state = .error(error.errorDescription ?? "Failed to load metrics")
       Owl.error("metrics.list.failed", attributes: ["error": "\(error)"])
     } catch {
+      if error.isCancellation { return }
       state = .error(error.localizedDescription)
       Owl.error("metrics.list.failed", attributes: ["error": "\(error)"])
     }

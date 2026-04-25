@@ -42,14 +42,12 @@ final class MetricDetailViewModel: ObservableObject {
     do {
       async let aggregation = MetricsService.aggregation(
         slug: slug,
-        teamId: teamId,
         projectId: projectId,
         since: since,
         dataMode: dataMode
       )
       async let events = MetricsService.events(
         slug: slug,
-        teamId: teamId,
         projectId: projectId,
         dataMode: dataMode,
         limit: 20
@@ -60,6 +58,7 @@ final class MetricDetailViewModel: ObservableObject {
       errorMessage = error.errorDescription
       Owl.error("metric.detail.load.failed", attributes: ["error": "\(error)", "slug": slug])
     } catch {
+      if error.isCancellation { return }
       errorMessage = error.localizedDescription
       Owl.error("metric.detail.load.failed", attributes: ["error": "\(error)", "slug": slug])
     }

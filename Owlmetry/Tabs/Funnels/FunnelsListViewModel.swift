@@ -21,6 +21,7 @@ final class FunnelsListViewModel: ObservableObject {
       state = .error(error.errorDescription ?? "Failed to load funnels")
       Owl.error("funnels.list.failed", attributes: ["error": "\(error)"])
     } catch {
+      if error.isCancellation { return }
       state = .error(error.localizedDescription)
       Owl.error("funnels.list.failed", attributes: ["error": "\(error)"])
     }

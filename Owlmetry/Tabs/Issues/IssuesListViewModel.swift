@@ -49,6 +49,7 @@ final class IssuesListViewModel: ObservableObject {
       state = .error(error.errorDescription ?? "Failed to load issues")
       Owl.error("issues.list.failed", attributes: ["error": "\(error)"])
     } catch {
+      if error.isCancellation { return }
       state = .error(error.localizedDescription)
       Owl.error("issues.list.failed", attributes: ["error": "\(error)"])
     }
