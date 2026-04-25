@@ -11,13 +11,10 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
     UNUserNotificationCenter.current().delegate = self
     Task { await PushAuthorization.requestAndRegister() }
 
-    // Cold-start notification tap: deliver the deep link as soon as we have
-    // an attached scene to consume it.
+    // Cold-start tap: defer until a scene is attached to consume the link.
     if let userInfo = launchOptions?[.remoteNotification] as? [AnyHashable: Any],
        let link = userInfo["link"] as? String {
-      Task { @MainActor in
-        DeepLinkRouter.shared.handle(link)
-      }
+      Task { @MainActor in DeepLinkRouter.shared.handle(link) }
     }
     return true
   }
@@ -44,16 +41,15 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
     Owl.error("push.register_failed", attributes: ["error": "\(error)"])
   }
 
-  // Foreground delivery — still show the banner so the user notices.
   func userNotificationCenter(
     _ center: UNUserNotificationCenter,
     willPresent notification: UNNotification,
     withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
   ) {
+    // Surface foreground notifications as banners; iOS suppresses them by default.
     completionHandler([.banner, .sound, .badge, .list])
   }
 
-  // Tap handler — extract the link payload and route through DeepLinkRouter.
   func userNotificationCenter(
     _ center: UNUserNotificationCenter,
     didReceive response: UNNotificationResponse,
@@ -61,9 +57,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
   ) {
     let userInfo = response.notification.request.content.userInfo
     if let link = userInfo["link"] as? String {
-      Task { @MainActor in
-        DeepLinkRouter.shared.handle(link)
-      }
+      Task { @MainActor in DeepLinkRouter.shared.handle(link) }
     }
     completionHandler()
   }

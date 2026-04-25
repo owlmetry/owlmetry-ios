@@ -18,7 +18,7 @@ struct NotificationCard: View {
             .padding(.horizontal, 6)
             .padding(.vertical, 2)
             .background(Color.secondary.opacity(0.12), in: Capsule())
-          Text(relativeTime(from: notification.createdAt))
+          Text(RelativeDate.string(from: notification.createdAt))
             .font(.caption2)
             .foregroundStyle(.secondary)
         }
@@ -55,14 +55,5 @@ struct NotificationCard: View {
     case "team.invitation": return "Invite"
     default: return type
     }
-  }
-
-  private func relativeTime(from iso: String) -> String {
-    let formatter = ISO8601DateFormatter()
-    formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-    let date = formatter.date(from: iso) ?? ISO8601DateFormatter().date(from: iso) ?? Date()
-    let formatter2 = RelativeDateTimeFormatter()
-    formatter2.unitsStyle = .abbreviated
-    return formatter2.localizedString(for: date, relativeTo: Date())
   }
 }

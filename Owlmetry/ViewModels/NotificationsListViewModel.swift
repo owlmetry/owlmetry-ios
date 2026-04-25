@@ -59,9 +59,12 @@ final class NotificationsListViewModel: ObservableObject {
   }
 
   func markRead(_ id: String) async {
-    // Optimistic
     if let i = notifications.firstIndex(where: { $0.id == id }) {
-      notifications[i] = withReadAt(notifications[i], readAt: ISO8601DateFormatter().string(from: Date()))
+      let n = notifications[i]
+      notifications[i] = OwlmetryNotification(
+        id: n.id, type: n.type, title: n.title, body: n.body, link: n.link,
+        teamId: n.teamId, readAt: ISO8601DateFormatter().string(from: Date()), createdAt: n.createdAt,
+      )
     }
     do {
       try await NotificationsService.markRead(id: id)
@@ -90,18 +93,5 @@ final class NotificationsListViewModel: ObservableObject {
       Owl.error("notifications.delete.failed", attributes: ["error": "\(error)"])
       await reload()
     }
-  }
-
-  private func withReadAt(_ n: OwlmetryNotification, readAt: String) -> OwlmetryNotification {
-    OwlmetryNotification(
-      id: n.id,
-      type: n.type,
-      title: n.title,
-      body: n.body,
-      link: n.link,
-      teamId: n.teamId,
-      readAt: readAt,
-      createdAt: n.createdAt,
-    )
   }
 }
