@@ -93,7 +93,6 @@ struct APIClient {
 
     var req = URLRequest(url: url)
     req.httpMethod = method
-    req.setValue("application/json", forHTTPHeaderField: "Content-Type")
     req.setValue("application/json", forHTTPHeaderField: "Accept")
 
     if let token = KeychainService.token() {
@@ -103,6 +102,7 @@ struct APIClient {
     if let body {
       do {
         req.httpBody = try encoder.encode(body)
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
       } catch {
         op.fail(error: "\(error)", attributes: ["kind": "encoding"])
         throw APIError.decoding(error)

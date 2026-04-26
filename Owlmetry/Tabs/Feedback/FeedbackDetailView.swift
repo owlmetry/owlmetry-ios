@@ -33,23 +33,33 @@ struct FeedbackDetailView: View {
     .task(id: feedback.id) {
       await viewModel.load(projectId: feedback.projectId, feedbackId: feedback.id)
     }
-    .confirmationDialog(
-      "Delete this feedback?",
-      isPresented: $showDeleteConfirm,
-      titleVisibility: .visible
-    ) {
+    .alert("Delete this feedback?", isPresented: $showDeleteConfirm) {
       Button("Delete", role: .destructive) {
         Task {
           let ok = await viewModel.deleteFeedback(projectId: feedback.projectId, feedbackId: feedback.id)
           if ok {
+            Haptics.notify(.success)
             onDeleted?(feedback.id)
             dismiss()
+          } else {
+            Haptics.notify(.error)
           }
         }
       }
       Button("Cancel", role: .cancel) {}
     } message: {
       Text("This cannot be undone.")
+    }
+    .alert(
+      "Couldn't delete feedback",
+      isPresented: Binding(
+        get: { viewModel.errorMessage != nil },
+        set: { if !$0 { viewModel.errorMessage = nil } }
+      )
+    ) {
+      Button("OK", role: .cancel) {}
+    } message: {
+      Text(viewModel.errorMessage ?? "")
     }
     .toolbar(.hidden, for: .tabBar)
     .owlScreen("FeedbackDetail")
@@ -160,7 +170,7 @@ struct FeedbackDetailView: View {
       }
       Divider()
       Button(role: .destructive) {
-        showDeleteConfirm = true
+        DispatchQueue.main.async { showDeleteConfirm = true }
       } label: {
         Label("Delete", systemImage: "trash")
       }
