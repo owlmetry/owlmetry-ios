@@ -108,6 +108,10 @@ struct MainTabView: View {
     case .feedbackList:
       selection = .feedback
       feedbackPath = NavigationPath()
+    case .usersList:
+      selection = .users
+    case .insights:
+      selection = .insights
     case .notifications:
       selection = .dashboard
       dashboardPath = NavigationPath()

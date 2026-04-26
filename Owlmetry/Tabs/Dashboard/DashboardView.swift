@@ -18,12 +18,18 @@ struct DashboardView: View {
         lastUpdatedLabel
         LazyVGrid(columns: columns, spacing: 12) {
           ForEach(cards) { card in
-            StatCard(
-              label: card.label,
-              systemImage: card.systemImage,
-              value: card.value,
-              isLoading: card.isLoading
-            )
+            Button {
+              Haptics.play(.light)
+              DeepLinkRouter.shared.pendingDeepLink = card.deepLink
+            } label: {
+              StatCard(
+                label: card.label,
+                systemImage: card.systemImage,
+                value: card.value,
+                isLoading: card.isLoading
+              )
+            }
+            .buttonStyle(.plain)
           }
         }
         if let error = viewModel.errorMessage {
@@ -116,42 +122,48 @@ struct DashboardView: View {
         label: "Open Issues",
         systemImage: "ladybug",
         value: format(viewModel.openIssuesCount),
-        isLoading: viewModel.openIssuesCount == nil
+        isLoading: viewModel.openIssuesCount == nil,
+        deepLink: .issuesList(projectId: nil)
       ),
       CardData(
         id: "events_24h",
         label: "Events · 24h",
         systemImage: "scroll",
         value: format(viewModel.eventsCount),
-        isLoading: viewModel.eventsCount == nil
+        isLoading: viewModel.eventsCount == nil,
+        deepLink: .usersList
       ),
       CardData(
         id: "users_24h",
         label: "Users · 24h",
         systemImage: "person.crop.circle.badge.magnifyingglass",
         value: format(viewModel.uniqueUsers),
-        isLoading: viewModel.uniqueUsers == nil
+        isLoading: viewModel.uniqueUsers == nil,
+        deepLink: .usersList
       ),
       CardData(
         id: "sessions_24h",
         label: "Sessions · 24h",
         systemImage: "point.3.connected.trianglepath.dotted",
         value: format(viewModel.uniqueSessions),
-        isLoading: viewModel.uniqueSessions == nil
+        isLoading: viewModel.uniqueSessions == nil,
+        deepLink: .usersList
       ),
       CardData(
         id: "metrics_24h",
         label: "Metrics · 24h",
         systemImage: "checkmark.circle",
         value: format(viewModel.metricsCount),
-        isLoading: viewModel.metricsCount == nil
+        isLoading: viewModel.metricsCount == nil,
+        deepLink: .insights
       ),
       CardData(
         id: "funnels_24h",
         label: "Funnels · 24h",
         systemImage: "line.3.horizontal.decrease.circle",
         value: funnelsValue,
-        isLoading: viewModel.funnelsCompletedCount == nil
+        isLoading: viewModel.funnelsCompletedCount == nil,
+        deepLink: .insights
       )
     ]
   }
@@ -182,5 +194,6 @@ struct DashboardView: View {
     let systemImage: String
     let value: String
     let isLoading: Bool
+    let deepLink: DeepLink
   }
 }
