@@ -30,8 +30,14 @@ private struct PatchPrefsBody: Encodable {
 }
 
 /// Notification types and their channels — mirrors @owlmetry/shared's
-/// NOTIFICATION_TYPE_META. Kept local because the iOS app doesn't pull from
-/// the npm package; the server validates inputs anyway.
+/// NOTIFICATION_TYPE_META (packages/shared/src/preferences.ts). Kept local
+/// because the iOS app doesn't pull from the npm package; the server
+/// validates inputs anyway.
+///
+/// KEEP IN SYNC: when a new type is added to NOTIFICATION_TYPES /
+/// NOTIFICATION_TYPE_META in shared, append the matching spec below — the
+/// web page renders straight from the shared map so it auto-updates, but
+/// iOS does not and will silently omit the type from this screen.
 private struct NotificationTypeSpec {
   let type: String
   let label: String
@@ -41,6 +47,13 @@ private struct NotificationTypeSpec {
 }
 
 private let NOTIFICATION_TYPE_SPECS: [NotificationTypeSpec] = [
+  .init(
+    type: "issue.new",
+    label: "New issues",
+    description: "Push as soon as a new or regressed issue is detected by the hourly scan. Bypasses the per-project digest cadence.",
+    channels: [("in_app", "In-app"), ("email", "Email"), ("ios_push", "iOS push")],
+    defaults: ["in_app": true, "email": false, "ios_push": true]
+  ),
   .init(
     type: "issue.digest",
     label: "Issue digests",
