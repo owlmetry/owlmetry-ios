@@ -8,38 +8,17 @@ struct NotificationsListView: View {
     content
       .navigationTitle("Notifications")
       .navigationBarTitleDisplayMode(.large)
-      .toolbar {
-        ToolbarItem(placement: .topBarTrailing) {
-          Menu {
-            ForEach(NotificationsListViewModel.ReadFilter.allCases, id: \.self) { f in
-              Button(f.label) {
-                viewModel.filter = f
-                Task { await viewModel.reload() }
-              }
-            }
-          } label: {
-            Image(systemName: "line.3.horizontal.decrease.circle")
-          }
-        }
-      }
-      .toolbar {
-        ToolbarItem(placement: .topBarLeading) {
-          if !viewModel.notifications.isEmpty && viewModel.unreadCount > 0 {
-            Button("Mark all read") {
-              Task { await viewModel.markAllRead() }
-            }
-            .font(.subheadline)
-          }
-        }
-      }
       .task {
         await viewModel.reload()
       }
       .refreshable {
         await viewModel.reload()
       }
-      .autoRefresh(id: viewModel.filter.rawValue, every: 30) {
+      .autoRefresh(id: "notifications-inbox", every: 30) {
         await viewModel.reload()
+      }
+      .onDisappear {
+        Task { await viewModel.markAllReadIfNeeded() }
       }
       .owlScreen("NotificationsList")
   }
@@ -52,7 +31,7 @@ struct NotificationsListView: View {
     case .empty:
       EmptyState(
         systemImage: "bell.slash",
-        title: viewModel.filter == .unread ? "No unread notifications" : "No notifications",
+        title: "No notifications",
         subtitle: "New issues, feedback, and job alerts will appear here."
       )
     case .error(let message):

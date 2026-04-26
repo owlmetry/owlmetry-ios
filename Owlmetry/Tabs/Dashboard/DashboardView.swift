@@ -6,6 +6,7 @@ struct DashboardView: View {
   @EnvironmentObject private var appState: AppState
   @StateObject private var viewModel = DashboardViewModel()
   @StateObject private var notifications = NotificationsListViewModel()
+  @ObservedObject private var badgeStore = InboxBadgeStore.shared
 
   private let columns: [GridItem] = [
     GridItem(.adaptive(minimum: 150, maximum: 240), spacing: 12)
@@ -41,7 +42,7 @@ struct DashboardView: View {
     .toolbar {
       ToolbarItem(placement: .topBarLeading) {
         NavigationLink(destination: ProfileView()) {
-          ProfileAvatarButton(initials: profileInitials, unread: notifications.unreadCount)
+          ProfileAvatarButton(initials: profileInitials, unread: badgeStore.unreadCount)
         }
       }
       if appState.projectsForCurrentTeam.count > 1 {
@@ -59,6 +60,11 @@ struct DashboardView: View {
     }
     .task {
       await notifications.refreshUnread()
+    }
+    .onAppear {
+      // Re-runs after popping back from Profile/Inbox so the avatar badge
+      // reflects a mark-all-read without waiting on the 30s auto-refresh.
+      Task { await notifications.refreshUnread() }
     }
     .owlScreen("Dashboard")
   }

@@ -8,34 +8,10 @@ final class NotificationsListViewModel: ObservableObject {
   @Published private(set) var notifications: [OwlmetryNotification] = []
   @Published private(set) var unreadCount: Int = 0
 
-  /// User-visible filter — defaults to "Unread" so the list opens to what
-  /// matters; tap "All" to see everything.
-  enum ReadFilter: String, CaseIterable, Hashable {
-    case unread, all, read
-
-    var label: String {
-      switch self {
-      case .unread: return "Unread"
-      case .all: return "All"
-      case .read: return "Read"
-      }
-    }
-
-    var apiValue: String? {
-      switch self {
-      case .unread: return "unread"
-      case .read: return "read"
-      case .all: return nil
-      }
-    }
-  }
-
-  @Published var filter: ReadFilter = .unread
-
   func reload() async {
     state = .loading
     do {
-      let dto = try await NotificationsService.list(readState: filter.apiValue, limit: 100)
+      let dto = try await NotificationsService.list(readState: nil, limit: 100)
       notifications = dto.notifications
       state = notifications.isEmpty ? .empty : .loaded(())
       await refreshUnread()
@@ -53,6 +29,7 @@ final class NotificationsListViewModel: ObservableObject {
     do {
       let dto = try await NotificationsService.unreadCount()
       if dto.count != unreadCount { unreadCount = dto.count }
+      InboxBadgeStore.shared.set(dto.count)
     } catch {
       // Non-fatal — badge just won't update this cycle.
     }
@@ -76,12 +53,24 @@ final class NotificationsListViewModel: ObservableObject {
   }
 
   func markAllRead() async {
+    // Optimistic: clear local + shared store + home-screen badge before the
+    // network round-trip so peer views (dashboard avatar, profile row) update
+    // synchronously when the inbox is dismissed.
+    unreadCount = 0
+    InboxBadgeStore.shared.set(0)
     do {
       _ = try await NotificationsService.markAllRead()
       await reload()
     } catch {
       Owl.error("notifications.read_all.failed", attributes: ["error": "\(error)"])
     }
+  }
+
+  /// No-op when there is nothing unread. Used by `NotificationsListView.onDisappear`
+  /// so navigating back from the inbox clears the unread state automatically.
+  func markAllReadIfNeeded() async {
+    guard unreadCount > 0 else { return }
+    await markAllRead()
   }
 
   func remove(_ id: String) async {

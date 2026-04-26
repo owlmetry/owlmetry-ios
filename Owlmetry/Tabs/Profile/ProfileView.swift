@@ -5,6 +5,7 @@ struct ProfileView: View {
   @EnvironmentObject private var auth: AuthViewModel
   @EnvironmentObject private var appState: AppState
   @StateObject private var notifications = NotificationsListViewModel()
+  @ObservedObject private var badgeStore = InboxBadgeStore.shared
   @State private var showFeedback = false
 
   var body: some View {
@@ -19,8 +20,8 @@ struct ProfileView: View {
           HStack {
             Label("Inbox", systemImage: "bell")
             Spacer()
-            if notifications.unreadCount > 0 {
-              Text("\(notifications.unreadCount)")
+            if badgeStore.unreadCount > 0 {
+              Text("\(badgeStore.unreadCount)")
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.white)
                 .padding(.horizontal, 6)
@@ -79,6 +80,11 @@ struct ProfileView: View {
     .navigationBarTitleDisplayMode(.inline)
     .task {
       await notifications.refreshUnread()
+    }
+    .onAppear {
+      // Re-runs after popping back from the inbox so the row count reflects
+      // a mark-all-read immediately.
+      Task { await notifications.refreshUnread() }
     }
     .autoRefresh(id: "profile-unread", every: 30) {
       await notifications.refreshUnread()
