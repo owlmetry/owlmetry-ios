@@ -330,7 +330,8 @@ struct IssueDetailView: View {
   }
 
   private var resolveSheet: some View {
-    NavigationStack {
+    let trimmedVersion = resolveVersion.trimmingCharacters(in: .whitespacesAndNewlines)
+    return NavigationStack {
       Form {
         Section {
           TextField("Version", text: $resolveVersion)
@@ -350,19 +351,18 @@ struct IssueDetailView: View {
         }
         ToolbarItem(placement: .topBarTrailing) {
           Button("Resolve") {
-            let version = resolveVersion.trimmingCharacters(in: .whitespacesAndNewlines)
             showResolveSheet = false
             Task {
               await viewModel.updateStatus(
                 projectId: issue.projectId,
                 issueId: issue.id,
                 status: .resolved,
-                resolvedAtVersion: version
+                resolvedAtVersion: trimmedVersion
               )
             }
           }
           .fontWeight(.semibold)
-          .disabled(resolveVersion.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+          .disabled(trimmedVersion.isEmpty)
         }
       }
     }
