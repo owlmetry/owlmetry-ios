@@ -174,7 +174,7 @@ struct DashboardView: View {
         value: avgRatingValue,
         secondary: avgRatingSecondary,
         isLoading: false,
-        deepLink: .reviewsList
+        deepLink: .ratingsList
       )
     ]
   }

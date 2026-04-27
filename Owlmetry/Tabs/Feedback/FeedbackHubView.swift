@@ -28,20 +28,23 @@ struct FeedbackHubView: View {
             Label("App Store Reviews", systemImage: "star.bubble")
               .font(.headline)
               .foregroundStyle(.primary)
-            HStack(spacing: 8) {
-              Text("Public reviews from the App Store, refreshed daily.")
-                .font(.footnote)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
-              Spacer(minLength: 0)
-            }
-            if let summary = teamRatingSummary {
-              RatingBadge(
-                rating: summary.average,
-                count: summary.total,
-                size: .sm
-              )
-            }
+            Text("Public reviews from the App Store, refreshed daily.")
+              .font(.footnote)
+              .foregroundStyle(.secondary)
+              .fixedSize(horizontal: false, vertical: true)
+          }
+        }
+        .buttonStyle(.plain)
+
+        NavigationLink(value: RatingsListNavRoute()) {
+          NavigableCard(accent: .yellow) {
+            Label("Ratings", systemImage: "star.leadinghalf.filled")
+              .font(.headline)
+              .foregroundStyle(.primary)
+            Text("Average ratings across your apps and countries.")
+              .font(.footnote)
+              .foregroundStyle(.secondary)
+              .fixedSize(horizontal: false, vertical: true)
           }
         }
         .buttonStyle(.plain)
@@ -55,20 +58,5 @@ struct FeedbackHubView: View {
       ToolbarItem(placement: .topBarTrailing) { ProjectSelectorMenu() }
     }
     .owlScreen("FeedbackHub")
-  }
-
-  private var teamRatingSummary: (average: Double, total: Int)? {
-    let scopedApps = appState.apps.filter {
-      appState.selectedProjectId == nil || $0.projectId == appState.selectedProjectId
-    }
-    var weightedSum: Double = 0
-    var total: Int = 0
-    for app in scopedApps {
-      guard let rating = app.latestRating, let count = app.latestRatingCount, count > 0 else { continue }
-      weightedSum += rating * Double(count)
-      total += count
-    }
-    guard total > 0 else { return nil }
-    return (weightedSum / Double(total), total)
   }
 }

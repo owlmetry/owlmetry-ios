@@ -32,6 +32,7 @@ struct ReviewsListView: View {
       }
       .refreshable { await reload() }
       .autoRefresh(id: refreshKey, every: 60) { await reload() }
+      .toolbar(.hidden, for: .tabBar)
       .owlScreen("ReviewsList")
   }
 

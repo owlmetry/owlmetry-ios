@@ -47,6 +47,18 @@ struct ReviewsListDTO: Decodable {
   let hasMore: Bool?
 }
 
+struct ReviewsByCountrySummary: Codable, Identifiable, Equatable, Hashable {
+  let countryCode: String
+  let reviewCount: Int
+  let averageRating: Double
+
+  var id: String { countryCode }
+}
+
+struct ReviewsByCountryDTO: Decodable {
+  let countries: [ReviewsByCountrySummary]
+}
+
 struct ReviewFilter: Equatable {
   var appId: String?
   var store: ReviewStore?

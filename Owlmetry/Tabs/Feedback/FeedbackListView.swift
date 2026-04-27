@@ -29,6 +29,7 @@ struct FeedbackListView: View {
       }
       .refreshable { await reload() }
       .autoRefresh(id: refreshKey, every: 30) { await reload() }
+      .toolbar(.hidden, for: .tabBar)
       .owlScreen("FeedbackList")
   }
 
