@@ -63,7 +63,13 @@ struct MainTabView: View {
         .tag(Tab.issues)
 
       NavigationStack(path: $feedbackPath) {
-        FeedbackListView()
+        FeedbackHubView()
+          .navigationDestination(for: FeedbackListNavRoute.self) { _ in
+            FeedbackListView()
+          }
+          .navigationDestination(for: ReviewsListNavRoute.self) { _ in
+            ReviewsListView()
+          }
           .navigationDestination(for: FeedbackDeepLinkRoute.self) { route in
             FeedbackDetailLoaderView(projectId: route.projectId, feedbackId: route.id)
           }
@@ -99,6 +105,7 @@ struct MainTabView: View {
     case .feedback(let id, let projectId):
       selection = .feedback
       feedbackPath = NavigationPath()
+      feedbackPath.append(FeedbackListNavRoute())
       if let projectId {
         feedbackPath.append(FeedbackDeepLinkRoute(id: id, projectId: projectId))
       }
@@ -108,6 +115,11 @@ struct MainTabView: View {
     case .feedbackList:
       selection = .feedback
       feedbackPath = NavigationPath()
+      feedbackPath.append(FeedbackListNavRoute())
+    case .reviewsList:
+      selection = .feedback
+      feedbackPath = NavigationPath()
+      feedbackPath.append(ReviewsListNavRoute())
     case .usersList:
       selection = .users
     case .insights:

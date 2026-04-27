@@ -10,6 +10,11 @@ struct AppModel: Codable, Identifiable, Equatable, Hashable {
   let latestAppVersion: String?
   let latestAppVersionUpdatedAt: String?
   let latestAppVersionSource: String?
+  let latestRating: Double?
+  let latestRatingCount: Int?
+  let currentVersionRating: Double?
+  let currentVersionRatingCount: Int?
+  let appleAppStoreId: Int?
   let createdAt: String
   let updatedAt: String?
 }

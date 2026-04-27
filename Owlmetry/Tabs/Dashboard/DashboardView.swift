@@ -166,8 +166,42 @@ struct DashboardView: View {
         secondary: funnelsPercent,
         isLoading: viewModel.funnelsCompletedCount == nil,
         deepLink: .insights
+      ),
+      CardData(
+        id: "avg_rating",
+        label: "Avg Rating",
+        systemImage: "star",
+        value: avgRatingValue,
+        secondary: avgRatingSecondary,
+        isLoading: false,
+        deepLink: .reviewsList
       )
     ]
+  }
+
+  private var ratingSummary: (avg: Double, total: Int)? {
+    let scopedApps = appState.apps.filter {
+      appState.selectedProjectId == nil || $0.projectId == appState.selectedProjectId
+    }
+    var weightedSum: Double = 0
+    var total: Int = 0
+    for app in scopedApps {
+      guard let rating = app.latestRating, let count = app.latestRatingCount, count > 0 else { continue }
+      weightedSum += rating * Double(count)
+      total += count
+    }
+    guard total > 0 else { return nil }
+    return (weightedSum / Double(total), total)
+  }
+
+  private var avgRatingValue: String {
+    guard let summary = ratingSummary else { return "—" }
+    return String(format: "★ %.1f", summary.avg)
+  }
+
+  private var avgRatingSecondary: String? {
+    guard let summary = ratingSummary else { return nil }
+    return summary.total.formatted(.number)
   }
 
   private var funnelsValue: String {
