@@ -15,9 +15,16 @@ final class InboxBadgeStore: ObservableObject {
   private init() {}
 
   /// Updates the in-app count and the home-screen icon badge in one step.
+  /// When the count reaches zero we also clear any delivered notifications
+  /// from Notification Center — otherwise stale push banners linger after
+  /// the user has already read them in-app.
   func set(_ value: Int) {
     let clamped = max(0, value)
     if unreadCount != clamped { unreadCount = clamped }
-    UNUserNotificationCenter.current().setBadgeCount(clamped) { _ in }
+    let center = UNUserNotificationCenter.current()
+    center.setBadgeCount(clamped) { _ in }
+    if clamped == 0 {
+      center.removeAllDeliveredNotifications()
+    }
   }
 }
