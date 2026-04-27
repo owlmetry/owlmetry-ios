@@ -41,7 +41,7 @@ struct RatingsView: View {
         .foregroundStyle(.secondary)
       HStack(alignment: .firstTextBaseline, spacing: 10) {
         if let summary = scopedSummary {
-          Text(String(format: "★ %.1f", summary.avg))
+          Text(String(format: "★ %.2f", summary.avg))
             .font(.system(size: 44, weight: .semibold))
             .monospacedDigit()
             .foregroundStyle(.orange)
@@ -166,7 +166,7 @@ struct RatingsView: View {
               .foregroundStyle(.secondary)
           }
           HStack(alignment: .firstTextBaseline, spacing: 4) {
-            Text(String(format: "%.1f", country.averageRating))
+            Text(String(format: "%.2f", country.averageRating))
               .font(.subheadline.weight(.semibold))
               .foregroundStyle(.primary)
               .monospacedDigit()

@@ -196,7 +196,7 @@ struct DashboardView: View {
 
   private var avgRatingValue: String {
     guard let summary = ratingSummary else { return "—" }
-    return String(format: "★ %.1f", summary.avg)
+    return String(format: "★ %.2f", summary.avg)
   }
 
   private var avgRatingSecondary: String? {

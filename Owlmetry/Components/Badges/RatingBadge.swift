@@ -29,7 +29,7 @@ struct RatingBadge: View {
     return HStack(spacing: 4) {
       Image(systemName: "star.fill")
         .foregroundStyle(.orange)
-      Text(String(format: "%.1f", rating))
+      Text(String(format: "%.2f", rating))
         .foregroundStyle(.primary)
       Text("(\(Self.formatCount(reviewers)))")
         .foregroundStyle(.secondary)
@@ -50,9 +50,9 @@ struct RatingBadge: View {
   }
 
   private func accessibilityText(rating: Double, count: Int) -> String {
-    var text = String(format: "%.1f stars, %d ratings", rating, count)
+    var text = String(format: "%.2f stars, %d ratings", rating, count)
     if let current = currentVersionRating {
-      text += String(format: ". Current version %.1f", current)
+      text += String(format: ". Current version %.2f", current)
       if let currentCount = currentVersionRatingCount {
         text += " across \(currentCount) ratings"
       }
