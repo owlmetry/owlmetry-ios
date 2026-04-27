@@ -186,7 +186,7 @@ struct DashboardView: View {
     var weightedSum: Double = 0
     var total: Int = 0
     for app in scopedApps {
-      guard let rating = app.latestRating, let count = app.latestRatingCount, count > 0 else { continue }
+      guard let rating = app.worldwideAverageRating, let count = app.worldwideRatingCount, count > 0 else { continue }
       weightedSum += rating * Double(count)
       total += count
     }

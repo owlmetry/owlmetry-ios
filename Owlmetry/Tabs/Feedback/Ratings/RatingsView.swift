@@ -137,7 +137,7 @@ struct RatingsView: View {
     HStack(spacing: 8) {
       Image(systemName: "globe")
         .foregroundStyle(.secondary)
-      Text("No country-tagged reviews yet.")
+      Text("No ratings synced yet.")
         .font(.footnote)
         .foregroundStyle(.secondary)
     }
@@ -173,7 +173,7 @@ struct RatingsView: View {
             Image(systemName: "star.fill")
               .font(.caption2)
               .foregroundStyle(.orange)
-            Text("(\(country.reviewCount))")
+            Text("(\(country.ratingCount.formatted(.number)))")
               .font(.caption)
               .foregroundStyle(.secondary)
               .monospacedDigit()
@@ -237,7 +237,7 @@ struct RatingsView: View {
     var weightedSum: Double = 0
     var total: Int = 0
     for app in apps {
-      guard let rating = app.latestRating, let count = app.latestRatingCount, count > 0 else { continue }
+      guard let rating = app.worldwideAverageRating, let count = app.worldwideRatingCount, count > 0 else { continue }
       weightedSum += rating * Double(count)
       total += count
     }

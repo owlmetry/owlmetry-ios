@@ -45,29 +45,4 @@ enum ReviewsService {
   static func detail(projectId: String, reviewId: String) async throws -> Review {
     try await APIClient.shared.get("/v1/projects/\(projectId)/reviews/\(reviewId)")
   }
-
-  static func byCountry(
-    teamId: String,
-    projectId: String? = nil,
-    appId: String? = nil,
-    store: ReviewStore? = nil
-  ) async throws -> ReviewsByCountryDTO {
-    if let projectId {
-      return try await APIClient.shared.get(
-        "/v1/projects/\(projectId)/reviews/by-country",
-        query: [
-          "app_id": appId,
-          "store": store?.rawValue
-        ]
-      )
-    }
-    return try await APIClient.shared.get(
-      "/v1/reviews/by-country",
-      query: [
-        "team_id": teamId,
-        "app_id": appId,
-        "store": store?.rawValue
-      ]
-    )
-  }
 }

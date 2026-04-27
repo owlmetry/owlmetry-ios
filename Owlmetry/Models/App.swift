@@ -10,11 +10,14 @@ struct AppModel: Codable, Identifiable, Equatable, Hashable {
   let latestAppVersion: String?
   let latestAppVersionUpdatedAt: String?
   let latestAppVersionSource: String?
-  let latestRating: Double?
-  let latestRatingCount: Int?
-  let currentVersionRating: Double?
-  let currentVersionRatingCount: Int?
   let appleAppStoreId: Int?
+  // Worldwide rating cache populated daily by app_store_ratings_sync from a
+  // weighted average over per-country snapshots in app_store_ratings.
+  let worldwideAverageRating: Double?
+  let worldwideRatingCount: Int?
+  let worldwideCurrentVersionRating: Double?
+  let worldwideCurrentVersionRatingCount: Int?
+  let ratingsSyncedAt: String?
   let createdAt: String
   let updatedAt: String?
 }
