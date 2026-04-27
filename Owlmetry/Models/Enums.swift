@@ -26,8 +26,8 @@ enum DataMode: String, Codable, CaseIterable, Identifiable {
 
 enum IssueStatus: String, Codable, CaseIterable, Identifiable {
   case new
-  case inProgress = "in_progress"
   case regressed
+  case inProgress = "in_progress"
   case resolved
   case silenced
 
