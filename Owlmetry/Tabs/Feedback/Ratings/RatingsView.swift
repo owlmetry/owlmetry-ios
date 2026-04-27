@@ -251,6 +251,10 @@ struct RatingsView: View {
 
   private func reload() async {
     guard let teamId = appState.currentTeam?.id else { return }
-    await viewModel.loadCountries(teamId: teamId, projectId: appState.selectedProjectId)
+    // Refresh apps too — the hero summary reads worldwide_* off the apps list,
+    // which would otherwise stay frozen at whatever was loaded on app launch.
+    async let countries: Void = viewModel.loadCountries(teamId: teamId, projectId: appState.selectedProjectId)
+    async let apps: Void = appState.loadProjectsAndApps()
+    _ = await (countries, apps)
   }
 }
