@@ -337,9 +337,9 @@ struct IssueDetailView: View {
             .textInputAutocapitalization(.never)
             .autocorrectionDisabled()
         } header: {
-          Text("Resolved at version (optional)")
+          Text("Resolved at version")
         } footer: {
-          Text("If this is marked resolved and the same issue reappears in a later version, it will be marked regressed automatically.")
+          Text("Required. Newer versions reporting this error will be marked regressed automatically. Silence the issue instead if you don't have a fix version.")
         }
       }
       .navigationTitle("Resolve issue")
@@ -357,11 +357,12 @@ struct IssueDetailView: View {
                 projectId: issue.projectId,
                 issueId: issue.id,
                 status: .resolved,
-                resolvedAtVersion: version.isEmpty ? nil : version
+                resolvedAtVersion: version
               )
             }
           }
           .fontWeight(.semibold)
+          .disabled(resolveVersion.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
         }
       }
     }
