@@ -4,6 +4,7 @@ struct StatCard: View {
   let label: String
   let systemImage: String
   let value: String
+  var secondary: String? = nil
   var isLoading: Bool = false
 
   var body: some View {
@@ -24,12 +25,22 @@ struct StatCard: View {
         if isLoading {
           ProgressView()
         } else {
-          Text(value)
-            .font(.system(size: 34, weight: .semibold, design: .default))
-            .monospacedDigit()
-            .lineLimit(1)
-            .minimumScaleFactor(0.6)
-            .foregroundStyle(.primary)
+          HStack(alignment: .firstTextBaseline, spacing: 6) {
+            Text(value)
+              .font(.system(size: 34, weight: .semibold, design: .default))
+              .monospacedDigit()
+              .lineLimit(1)
+              .minimumScaleFactor(0.4)
+              .foregroundStyle(.primary)
+            if let secondary {
+              Text(secondary)
+                .font(.system(size: 13, weight: .medium))
+                .monospacedDigit()
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+                .foregroundStyle(.secondary)
+            }
+          }
         }
       }
       .frame(height: 42, alignment: .leading)

@@ -26,6 +26,7 @@ struct DashboardView: View {
                 label: card.label,
                 systemImage: card.systemImage,
                 value: card.value,
+                secondary: card.secondary,
                 isLoading: card.isLoading
               )
             }
@@ -162,6 +163,7 @@ struct DashboardView: View {
         label: "Funnels · 24h",
         systemImage: "line.3.horizontal.decrease.circle",
         value: funnelsValue,
+        secondary: funnelsPercent,
         isLoading: viewModel.funnelsCompletedCount == nil,
         deepLink: .insights
       )
@@ -172,6 +174,15 @@ struct DashboardView: View {
     guard let completed = viewModel.funnelsCompletedCount else { return "—" }
     let started = viewModel.funnelsStartedCount ?? 0
     return "\(format(completed))/\(format(started))"
+  }
+
+  private var funnelsPercent: String? {
+    guard let completed = viewModel.funnelsCompletedCount,
+      let started = viewModel.funnelsStartedCount,
+      started > 0
+    else { return nil }
+    let pct = Int((Double(completed) / Double(started) * 100).rounded())
+    return "\(pct)%"
   }
 
   private func format(_ value: Int?) -> String {
@@ -193,6 +204,7 @@ struct DashboardView: View {
     let label: String
     let systemImage: String
     let value: String
+    var secondary: String? = nil
     let isLoading: Bool
     let deepLink: DeepLink
   }
