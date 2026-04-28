@@ -27,6 +27,7 @@ struct DashboardView: View {
                 systemImage: card.systemImage,
                 value: card.value,
                 secondary: card.secondary,
+                delta: card.delta,
                 isLoading: card.isLoading
               )
             }
@@ -174,34 +175,27 @@ struct DashboardView: View {
         systemImage: "star",
         value: avgRatingValue,
         secondary: avgRatingSecondary,
+        delta: ratingSummaryForScope?.delta,
         isLoading: false,
         deepLink: .ratingsList
       )
     ]
   }
 
-  private var ratingSummary: (avg: Double, total: Int)? {
+  private var ratingSummaryForScope: (avg: Double, total: Int, delta: Int?)? {
     let scopedApps = appState.apps.filter {
       appState.selectedProjectId == nil || $0.projectId == appState.selectedProjectId
     }
-    var weightedSum: Double = 0
-    var total: Int = 0
-    for app in scopedApps {
-      guard let rating = app.worldwideAverageRating, let count = app.worldwideRatingCount, count > 0 else { continue }
-      weightedSum += rating * Double(count)
-      total += count
-    }
-    guard total > 0 else { return nil }
-    return (weightedSum / Double(total), total)
+    return ratingSummary(for: scopedApps)
   }
 
   private var avgRatingValue: String {
-    guard let summary = ratingSummary else { return "—" }
+    guard let summary = ratingSummaryForScope else { return "—" }
     return String(format: "★ %.2f", summary.avg)
   }
 
   private var avgRatingSecondary: String? {
-    guard let summary = ratingSummary else { return nil }
+    guard let summary = ratingSummaryForScope else { return nil }
     return summary.total.formatted(.number)
   }
 
@@ -254,6 +248,7 @@ struct DashboardView: View {
     let systemImage: String
     let value: String
     var secondary: String? = nil
+    var delta: Int? = nil
     let isLoading: Bool
     let deepLink: DeepLink
   }

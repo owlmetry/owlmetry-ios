@@ -7,6 +7,8 @@ import Foundation
 struct RatingsByCountrySummary: Codable, Identifiable, Equatable, Hashable {
   let countryCode: String
   let ratingCount: Int
+  // Change since the previous daily snapshot. Null on first-day data.
+  let ratingCountDelta: Int?
   let averageRating: Double
 
   var id: String { countryCode }
@@ -20,6 +22,7 @@ struct PerCountryRating: Codable, Identifiable, Equatable, Hashable {
   let countryCode: String
   let averageRating: Double?
   let ratingCount: Int
+  let ratingCountDelta: Int?
   let currentVersionAverageRating: Double?
   let currentVersionRatingCount: Int?
   let appVersion: String?
@@ -31,6 +34,8 @@ struct PerCountryRating: Codable, Identifiable, Equatable, Hashable {
 struct AppRatingSummary: Codable, Equatable, Hashable {
   let worldwideAverage: Double?
   let worldwideCount: Int
+  // Sum of per-country deltas; null if no country has prior data for this app.
+  let worldwideRatingCountDelta: Int?
   let currentVersionAverage: Double?
   let currentVersionCount: Int?
   let syncedAt: String?

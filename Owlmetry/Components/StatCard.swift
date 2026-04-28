@@ -5,6 +5,7 @@ struct StatCard: View {
   let systemImage: String
   let value: String
   var secondary: String? = nil
+  var delta: Int? = nil
   var isLoading: Bool = false
 
   var body: some View {
@@ -40,6 +41,7 @@ struct StatCard: View {
                 .minimumScaleFactor(0.6)
                 .foregroundStyle(.secondary)
             }
+            DeltaText(delta: delta, tone: .muted)
           }
         }
       }

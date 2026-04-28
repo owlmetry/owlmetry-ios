@@ -45,9 +45,13 @@ struct RatingsView: View {
             .font(.system(size: 44, weight: .semibold))
             .monospacedDigit()
             .foregroundStyle(.orange)
-          Text("\(summary.total.formatted(.number)) ratings")
-            .font(.callout)
-            .foregroundStyle(.secondary)
+          HStack(spacing: 4) {
+            Text("\(summary.total.formatted(.number)) ratings")
+              .font(.callout)
+              .foregroundStyle(.secondary)
+            DeltaText(delta: summary.delta, tone: .colored)
+              .font(.callout.weight(.medium))
+          }
         } else {
           Text("—")
             .font(.system(size: 44, weight: .semibold))
@@ -98,7 +102,10 @@ struct RatingsView: View {
           .lineLimit(1)
         Spacer(minLength: 0)
         if let avg = row.avg {
-          RatingBadge(rating: avg, count: row.total, size: .sm)
+          HStack(spacing: 6) {
+            RatingBadge(rating: avg, count: row.total, size: .sm)
+            DeltaText(delta: row.delta, tone: .colored)
+          }
         } else {
           Text("No ratings")
             .font(.caption2)
@@ -177,6 +184,7 @@ struct RatingsView: View {
               .font(.caption)
               .foregroundStyle(.secondary)
               .monospacedDigit()
+            DeltaText(delta: country.ratingCountDelta, tone: .colored)
           }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -207,19 +215,25 @@ struct RatingsView: View {
     let project: Project
     let avg: Double?
     let total: Int
+    let delta: Int?
   }
 
   private var projectRows: [ProjectRatingRow] {
     appState.projectsForCurrentTeam.compactMap { project in
       let projectApps = appState.apps.filter { $0.projectId == project.id }
       let summary = ratingSummary(for: projectApps)
-      return ProjectRatingRow(project: project, avg: summary?.avg, total: summary?.total ?? 0)
+      return ProjectRatingRow(
+        project: project,
+        avg: summary?.avg,
+        total: summary?.total ?? 0,
+        delta: summary?.delta
+      )
     }
     .filter { $0.total > 0 }
     .sorted { $0.total > $1.total }
   }
 
-  private var scopedSummary: (avg: Double, total: Int)? {
+  private var scopedSummary: (avg: Double, total: Int, delta: Int?)? {
     let scopedApps = appState.apps.filter {
       appState.selectedProjectId == nil || $0.projectId == appState.selectedProjectId
     }
@@ -231,18 +245,6 @@ struct RatingsView: View {
       return "\(project.name) · All time"
     }
     return "All apps · All time"
-  }
-
-  private func ratingSummary(for apps: [AppModel]) -> (avg: Double, total: Int)? {
-    var weightedSum: Double = 0
-    var total: Int = 0
-    for app in apps {
-      guard let rating = app.worldwideAverageRating, let count = app.worldwideRatingCount, count > 0 else { continue }
-      weightedSum += rating * Double(count)
-      total += count
-    }
-    guard total > 0 else { return nil }
-    return (weightedSum / Double(total), total)
   }
 
   private var refreshKey: String {
