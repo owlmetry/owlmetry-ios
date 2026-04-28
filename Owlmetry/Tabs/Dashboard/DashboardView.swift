@@ -154,8 +154,9 @@ struct DashboardView: View {
         id: "metrics_24h",
         label: "Metrics · 24h",
         systemImage: "checkmark.circle",
-        value: format(viewModel.metricsCount),
-        isLoading: viewModel.metricsCount == nil,
+        value: metricsValue,
+        secondary: metricsPercent,
+        isLoading: viewModel.metricsCompletedCount == nil,
         deepLink: .insights
       ),
       CardData(
@@ -216,6 +217,20 @@ struct DashboardView: View {
       started > 0
     else { return nil }
     let pct = Int((Double(completed) / Double(started) * 100).rounded())
+    return "\(pct)%"
+  }
+
+  private var metricsValue: String {
+    guard let completed = viewModel.metricsCompletedCount else { return "—" }
+    let total = completed + (viewModel.metricsFailedCount ?? 0)
+    return "\(format(completed))/\(format(total))"
+  }
+
+  private var metricsPercent: String? {
+    guard let completed = viewModel.metricsCompletedCount else { return nil }
+    let total = completed + (viewModel.metricsFailedCount ?? 0)
+    guard total > 0 else { return nil }
+    let pct = Int((Double(completed) / Double(total) * 100).rounded())
     return "\(pct)%"
   }
 

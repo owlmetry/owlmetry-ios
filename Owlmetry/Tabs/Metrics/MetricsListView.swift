@@ -15,6 +15,10 @@ struct MetricsListView: View {
     projectIdOverride ?? appState.selectedProjectId
   }
 
+  private var refreshKey: String {
+    "\(effectiveProjectId ?? "-")|\(appState.dataMode.rawValue)"
+  }
+
   var body: some View {
     content
       .navigationTitle("Metrics")
@@ -24,9 +28,9 @@ struct MetricsListView: View {
           ToolbarItem(placement: .topBarTrailing) { ProjectSelectorMenu() }
         }
       }
-      .refreshable { await viewModel.load(projectId: effectiveProjectId) }
-      .task(id: effectiveProjectId) {
-        await viewModel.load(projectId: effectiveProjectId)
+      .refreshable { await viewModel.load(projectId: effectiveProjectId, dataMode: appState.dataMode) }
+      .task(id: refreshKey) {
+        await viewModel.load(projectId: effectiveProjectId, dataMode: appState.dataMode)
       }
       .toolbar(.hidden, for: .tabBar)
       .owlScreen("MetricsList")
@@ -48,7 +52,7 @@ struct MetricsListView: View {
         EmptyState(systemImage: "chart.bar", title: "No metrics yet", subtitle: "Metrics defined in this project will appear here.")
       case .error(let message):
         ErrorState(message: message) {
-          Task { await viewModel.load(projectId: effectiveProjectId) }
+          Task { await viewModel.load(projectId: effectiveProjectId, dataMode: appState.dataMode) }
         }
       case .loaded:
         ScrollView {
@@ -57,7 +61,11 @@ struct MetricsListView: View {
               NavigationLink {
                 MetricDetailView(metric: metric)
               } label: {
-                MetricCard(metric: metric, project: appState.projectsById[metric.projectId])
+                MetricCard(
+                  metric: metric,
+                  project: appState.projectsById[metric.projectId],
+                  stats: viewModel.statsBySlug[metric.slug]
+                )
               }
               .buttonStyle(.plain)
             }

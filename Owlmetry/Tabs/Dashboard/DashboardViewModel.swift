@@ -8,7 +8,8 @@ final class DashboardViewModel: ObservableObject {
   @Published var eventsCount: Int?
   @Published var uniqueUsers: Int?
   @Published var uniqueSessions: Int?
-  @Published var metricsCount: Int?
+  @Published var metricsCompletedCount: Int?
+  @Published var metricsFailedCount: Int?
   @Published var funnelsCompletedCount: Int?
   @Published var funnelsStartedCount: Int?
   @Published var lastUpdatedAt: Date?
@@ -34,7 +35,10 @@ final class DashboardViewModel: ObservableObject {
       uniqueUsers = r.uniqueUsers
       uniqueSessions = r.uniqueSessions
     }
-    if let v = metricsResult { metricsCount = v }
+    if let r = metricsResult {
+      metricsCompletedCount = r.count
+      metricsFailedCount = r.failed ?? 0
+    }
     if let r = funnelsResult {
       funnelsCompletedCount = r.count
       funnelsStartedCount = r.started
@@ -48,7 +52,7 @@ final class DashboardViewModel: ObservableObject {
       && funnelsResult == nil
     let anyCachedData = openIssuesCount != nil
       || eventsCount != nil
-      || metricsCount != nil
+      || metricsCompletedCount != nil
       || funnelsCompletedCount != nil
     if allFailed && !anyCachedData {
       errorMessage = "Couldn't load dashboard. Pull to retry."
@@ -86,10 +90,9 @@ final class DashboardViewModel: ObservableObject {
     }
   }
 
-  private func fetchMetricsCount(teamId: String, projectId: String?, since: String, dataMode: DataMode) async -> Int? {
+  private func fetchMetricsCount(teamId: String, projectId: String?, since: String, dataMode: DataMode) async -> CompletionsCountResponse? {
     do {
-      let r = try await MetricsService.completionsCount(teamId: teamId, projectId: projectId, since: since, dataMode: dataMode)
-      return r.count
+      return try await MetricsService.completionsCount(teamId: teamId, projectId: projectId, since: since, dataMode: dataMode)
     } catch {
       if !error.isCancellation {
         Owl.error("dashboard.load.failed", attributes: ["kind": "metrics", "error": "\(error)"])

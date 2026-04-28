@@ -41,6 +41,23 @@ enum MetricsService {
     )
   }
 
+  static func stats(
+    projectId: String,
+    since: String? = nil,
+    until: String? = nil,
+    dataMode: DataMode
+  ) async throws -> [MetricStatsEntry] {
+    let response: MetricStatsResponse = try await APIClient.shared.get(
+      "/v1/projects/\(projectId)/metric-stats",
+      query: [
+        "since": since,
+        "until": until,
+        "data_mode": dataMode.rawValue
+      ]
+    )
+    return response.stats
+  }
+
   static func events(
     slug: String,
     projectId: String,
