@@ -59,7 +59,7 @@ private let NOTIFICATION_TYPE_SPECS: [NotificationTypeSpec] = [
     label: "Issue digests",
     description: "Periodic summary of new or regressed issues for your projects.",
     channels: [("in_app", "In-app"), ("email", "Email"), ("mobile_push", "Mobile push")],
-    defaults: ["in_app": true, "email": true, "mobile_push": true]
+    defaults: ["in_app": false, "email": true, "mobile_push": false]
   ),
   .init(
     type: "feedback.new",
@@ -73,7 +73,7 @@ private let NOTIFICATION_TYPE_SPECS: [NotificationTypeSpec] = [
     label: "Job completion",
     description: "When a manual job you triggered with --notify finishes.",
     channels: [("in_app", "In-app"), ("email", "Email"), ("mobile_push", "Mobile push")],
-    defaults: ["in_app": true, "email": true, "mobile_push": false]
+    defaults: ["in_app": true, "email": true, "mobile_push": true]
   ),
 ]
 
