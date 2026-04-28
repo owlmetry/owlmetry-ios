@@ -45,4 +45,24 @@ enum ReviewsService {
   static func detail(projectId: String, reviewId: String) async throws -> Review {
     try await APIClient.shared.get("/v1/projects/\(projectId)/reviews/\(reviewId)")
   }
+
+  struct RespondRequest: Encodable { let body: String }
+
+  static func respond(
+    projectId: String,
+    reviewId: String,
+    body: String
+  ) async throws -> Review {
+    try await APIClient.shared.put(
+      "/v1/projects/\(projectId)/reviews/\(reviewId)/response",
+      body: RespondRequest(body: body)
+    )
+  }
+
+  /// Removes the developer response on Apple's side. Irrecoverable.
+  static func deleteResponse(projectId: String, reviewId: String) async throws -> Review {
+    try await APIClient.shared.delete(
+      "/v1/projects/\(projectId)/reviews/\(reviewId)/response"
+    )
+  }
 }

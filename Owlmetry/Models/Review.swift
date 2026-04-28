@@ -16,8 +16,23 @@ struct Review: Codable, Identifiable, Equatable, Hashable {
   let languageCode: String?
   let developerResponse: String?
   let developerResponseAt: String?
+  let developerResponseId: String?
+  let developerResponseState: ReviewResponseState?
+  let respondedByUserId: String?
   let createdAtInStore: String
   let ingestedAt: String
+}
+
+enum ReviewResponseState: String, Codable, Hashable {
+  case published = "PUBLISHED"
+  case pendingPublish = "PENDING_PUBLISH"
+
+  var displayLabel: String {
+    switch self {
+    case .published: return "Published"
+    case .pendingPublish: return "Pending publish"
+    }
+  }
 }
 
 enum ReviewStore: String, Codable, CaseIterable, Identifiable {

@@ -69,6 +69,10 @@ struct APIClient {
     try await request(path: path, method: "PATCH", body: Optional<Empty>.none, query: [:])
   }
 
+  func put<Req: Encodable, Res: Decodable>(_ path: String, body: Req) async throws -> Res {
+    try await request(path: path, method: "PUT", body: body, query: [:])
+  }
+
   func delete<Res: Decodable>(_ path: String) async throws -> Res {
     try await request(path: path, method: "DELETE", body: Optional<Empty>.none, query: [:])
   }
