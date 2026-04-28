@@ -75,6 +75,20 @@ private let NOTIFICATION_TYPE_SPECS: [NotificationTypeSpec] = [
     channels: [("in_app", "In-app"), ("email", "Email"), ("mobile_push", "Mobile push")],
     defaults: ["in_app": true, "email": true, "mobile_push": true]
   ),
+  .init(
+    type: "app.rating_changed",
+    label: "New ratings",
+    description: "When an app's rating count increases on the App Store — i.e., new ratings have appeared.",
+    channels: [("in_app", "In-app"), ("email", "Email"), ("mobile_push", "Mobile push")],
+    defaults: ["in_app": true, "email": false, "mobile_push": true]
+  ),
+  .init(
+    type: "app.review_new",
+    label: "New reviews",
+    description: "When new written reviews are pulled from App Store Connect for one of your apps.",
+    channels: [("in_app", "In-app"), ("email", "Email"), ("mobile_push", "Mobile push")],
+    defaults: ["in_app": true, "email": true, "mobile_push": true]
+  ),
 ]
 
 @MainActor
