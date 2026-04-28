@@ -51,29 +51,29 @@ private let NOTIFICATION_TYPE_SPECS: [NotificationTypeSpec] = [
     type: "issue.new",
     label: "New issues",
     description: "Push as soon as a new or regressed issue is detected by the hourly scan. Bypasses the per-project digest cadence.",
-    channels: [("in_app", "In-app"), ("email", "Email"), ("ios_push", "iOS push")],
-    defaults: ["in_app": true, "email": false, "ios_push": true]
+    channels: [("in_app", "In-app"), ("email", "Email"), ("mobile_push", "Mobile push")],
+    defaults: ["in_app": true, "email": false, "mobile_push": true]
   ),
   .init(
     type: "issue.digest",
     label: "Issue digests",
     description: "Periodic summary of new or regressed issues for your projects.",
-    channels: [("in_app", "In-app"), ("email", "Email"), ("ios_push", "iOS push")],
-    defaults: ["in_app": true, "email": true, "ios_push": true]
+    channels: [("in_app", "In-app"), ("email", "Email"), ("mobile_push", "Mobile push")],
+    defaults: ["in_app": true, "email": true, "mobile_push": true]
   ),
   .init(
     type: "feedback.new",
     label: "New feedback",
     description: "When a user submits feedback in one of your apps.",
-    channels: [("in_app", "In-app"), ("email", "Email"), ("ios_push", "iOS push")],
-    defaults: ["in_app": true, "email": true, "ios_push": true]
+    channels: [("in_app", "In-app"), ("email", "Email"), ("mobile_push", "Mobile push")],
+    defaults: ["in_app": true, "email": true, "mobile_push": true]
   ),
   .init(
     type: "job.completed",
     label: "Job completion",
     description: "When a manual job you triggered with --notify finishes.",
-    channels: [("in_app", "In-app"), ("email", "Email"), ("ios_push", "iOS push")],
-    defaults: ["in_app": true, "email": true, "ios_push": false]
+    channels: [("in_app", "In-app"), ("email", "Email"), ("mobile_push", "Mobile push")],
+    defaults: ["in_app": true, "email": true, "mobile_push": false]
   ),
 ]
 

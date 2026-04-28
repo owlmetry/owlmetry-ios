@@ -13,6 +13,7 @@ enum DevicesService {
   static func register(token: String) async throws {
     struct Body: Encodable {
       let channel: String
+      let platform: String
       let token: String
       let environment: String
       let appVersion: String?
@@ -25,7 +26,8 @@ enum DevicesService {
     struct DeviceDTO: Decodable { let id: String }
 
     let body = Body(
-      channel: "ios_push",
+      channel: "mobile_push",
+      platform: "ios",
       token: token,
       environment: APNsEnvironment.current,
       appVersion: appVersion(),
