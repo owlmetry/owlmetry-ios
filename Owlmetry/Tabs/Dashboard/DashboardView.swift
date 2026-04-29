@@ -170,6 +170,15 @@ struct DashboardView: View {
         deepLink: .insights
       ),
       CardData(
+        id: "reviews",
+        label: "Reviews",
+        systemImage: "star.bubble",
+        value: format(viewModel.reviewsCount),
+        delta: viewModel.reviewsDelta,
+        isLoading: viewModel.reviewsCount == nil,
+        deepLink: .reviewsList
+      ),
+      CardData(
         id: "avg_rating",
         label: "Avg Rating",
         systemImage: "star",

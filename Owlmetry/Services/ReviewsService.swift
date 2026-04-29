@@ -1,6 +1,23 @@
 import Foundation
 
 enum ReviewsService {
+  static func count(
+    teamId: String,
+    projectId: String? = nil,
+    since: String? = nil
+  ) async throws -> Int {
+    struct CountResponse: Decodable { let count: Int }
+    let response: CountResponse = try await APIClient.shared.get(
+      "/v1/reviews/count",
+      query: [
+        "team_id": teamId,
+        "project_id": projectId,
+        "since": since
+      ]
+    )
+    return response.count
+  }
+
   static func list(
     teamId: String,
     projectId: String? = nil,

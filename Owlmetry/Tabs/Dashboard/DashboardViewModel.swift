@@ -12,6 +12,8 @@ final class DashboardViewModel: ObservableObject {
   @Published var metricsFailedCount: Int?
   @Published var funnelsCompletedCount: Int?
   @Published var funnelsStartedCount: Int?
+  @Published var reviewsCount: Int?
+  @Published var reviewsDelta: Int?
   @Published var lastUpdatedAt: Date?
 
   @Published var errorMessage: String?
@@ -23,11 +25,15 @@ final class DashboardViewModel: ObservableObject {
     async let events = fetchEventsCount(teamId: teamId, projectId: projectId, since: since, dataMode: dataMode)
     async let metrics = fetchMetricsCount(teamId: teamId, projectId: projectId, since: since, dataMode: dataMode)
     async let funnels = fetchFunnelsCount(teamId: teamId, projectId: projectId, since: since, dataMode: dataMode)
+    async let reviews = fetchReviewsCount(teamId: teamId, projectId: projectId)
+    async let reviewsRecent = fetchReviewsCount(teamId: teamId, projectId: projectId, since: since)
 
     let openIssuesResult = await openIssues
     let eventsResult = await events
     let metricsResult = await metrics
     let funnelsResult = await funnels
+    let reviewsResult = await reviews
+    let reviewsDeltaResult = await reviewsRecent
 
     if let v = openIssuesResult { openIssuesCount = v }
     if let r = eventsResult {
@@ -43,6 +49,8 @@ final class DashboardViewModel: ObservableObject {
       funnelsCompletedCount = r.count
       funnelsStartedCount = r.started
     }
+    if let v = reviewsResult { reviewsCount = v }
+    if let v = reviewsDeltaResult { reviewsDelta = v }
 
     if Task.isCancelled { return }
 
@@ -50,15 +58,28 @@ final class DashboardViewModel: ObservableObject {
       && eventsResult == nil
       && metricsResult == nil
       && funnelsResult == nil
+      && reviewsResult == nil
     let anyCachedData = openIssuesCount != nil
       || eventsCount != nil
       || metricsCompletedCount != nil
       || funnelsCompletedCount != nil
+      || reviewsCount != nil
     if allFailed && !anyCachedData {
       errorMessage = "Couldn't load dashboard. Pull to retry."
     } else {
       errorMessage = nil
       lastUpdatedAt = Date()
+    }
+  }
+
+  private func fetchReviewsCount(teamId: String, projectId: String?, since: String? = nil) async -> Int? {
+    do {
+      return try await ReviewsService.count(teamId: teamId, projectId: projectId, since: since)
+    } catch {
+      if !error.isCancellation {
+        Owl.error("dashboard.load.failed", attributes: ["kind": "reviews", "error": "\(error)"])
+      }
+      return nil
     }
   }
 
