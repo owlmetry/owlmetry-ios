@@ -29,6 +29,7 @@ enum IssueStatus: String, Codable, CaseIterable, Identifiable {
   case regressed
   case inProgress = "in_progress"
   case resolved
+  case snoozed
   case silenced
 
   var id: String { rawValue }
@@ -39,6 +40,7 @@ enum IssueStatus: String, Codable, CaseIterable, Identifiable {
     case .inProgress: return "In Progress"
     case .regressed: return "Regressed"
     case .resolved: return "Resolved"
+    case .snoozed: return "Snoozed"
     case .silenced: return "Silenced"
     }
   }
@@ -49,6 +51,7 @@ enum IssueStatus: String, Codable, CaseIterable, Identifiable {
     case .inProgress: return "🔧"
     case .regressed: return "🔄"
     case .resolved: return "✅"
+    case .snoozed: return "💤"
     case .silenced: return "🔇"
     }
   }

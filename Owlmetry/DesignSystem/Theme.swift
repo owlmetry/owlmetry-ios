@@ -12,6 +12,7 @@ enum Theme {
       case .inProgress: return .blue
       case .regressed: return .yellow
       case .resolved: return .green
+      case .snoozed: return .yellow
       case .silenced: return .gray
       }
     }

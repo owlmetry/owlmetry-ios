@@ -310,6 +310,13 @@ struct IssueDetailView: View {
           Label("Silence", systemImage: "speaker.slash")
         }
       }
+      if currentIssue.status != .snoozed {
+        Button {
+          Task { await updateStatus(.snoozed) }
+        } label: {
+          Label("Snooze", systemImage: "moon.zzz")
+        }
+      }
       if currentIssue.status != .inProgress {
         Button {
           Task { await updateStatus(.inProgress) }
