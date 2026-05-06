@@ -1,6 +1,7 @@
 import Combine
 import Foundation
 import Owlmetry
+import UIKit
 
 @MainActor
 final class IssueDetailViewModel: ObservableObject {
@@ -64,6 +65,7 @@ final class IssueDetailViewModel: ObservableObject {
         resolvedAtVersion: resolvedAtVersion
       )
       issue = updated
+      Haptics.notify(.success)
     } catch let error as APIError {
       errorMessage = error.errorDescription
       Owl.error("issue.status.update.failed", attributes: ["error": "\(error)", "issue_id": issueId, "status": status.rawValue])

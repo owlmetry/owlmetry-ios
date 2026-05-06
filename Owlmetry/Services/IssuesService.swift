@@ -64,13 +64,9 @@ enum IssuesService {
       let status: String
       let resolvedAtVersion: String?
     }
-    struct Envelope: Decodable {
-      let issue: Issue
-    }
-    let envelope: Envelope = try await APIClient.shared.patch(
+    return try await APIClient.shared.patch(
       "/v1/projects/\(projectId)/issues/\(issueId)",
       body: Body(status: status.rawValue, resolvedAtVersion: resolvedAtVersion)
     )
-    return envelope.issue
   }
 }
