@@ -44,15 +44,31 @@ final class IssuesListViewModel: ObservableObject {
         limit: 100
       )
       issues = dto.issues
+      for failure in dto.decodeFailures {
+        Owl.warn("issues.list.decode_skipped", attributes: [
+          "index": "\(failure.index)",
+          "reason": failure.reason
+        ])
+      }
       state = issues.isEmpty ? .empty : .loaded(())
     } catch let error as APIError {
       state = .error(error.errorDescription ?? "Failed to load issues")
-      Owl.error("issues.list.failed", attributes: ["error": "\(error)"])
+      Owl.error("issues.list.failed", attributes: errorAttributes(error))
     } catch {
       if error.isCancellation { return }
       state = .error(error.localizedDescription)
       Owl.error("issues.list.failed", attributes: ["error": "\(error)"])
     }
+  }
+
+  private func errorAttributes(_ error: APIError) -> [String: String] {
+    var attrs = error.metricAttributes
+    if case .decoding(let underlying) = error {
+      attrs["detail"] = DecodingFailureSummary.string(from: underlying)
+    } else {
+      attrs["error"] = "\(error)"
+    }
+    return attrs
   }
 
   func applyStatusLocally(issueId: String, status: IssueStatus) {
@@ -63,7 +79,7 @@ final class IssuesListViewModel: ObservableObject {
         projectId: updated.projectId,
         appId: updated.appId,
         title: updated.title,
-        fingerprint: updated.fingerprint,
+        fingerprints: updated.fingerprints,
         status: status,
         occurrenceCount: updated.occurrenceCount,
         uniqueUserCount: updated.uniqueUserCount,
@@ -73,8 +89,7 @@ final class IssuesListViewModel: ObservableObject {
         lastSeenAppVersion: updated.lastSeenAppVersion,
         resolvedAtVersion: updated.resolvedAtVersion,
         isDev: updated.isDev,
-        source: updated.source,
-        environment: updated.environment,
+        sourceModule: updated.sourceModule,
         createdAt: updated.createdAt,
         updatedAt: updated.updatedAt
       )

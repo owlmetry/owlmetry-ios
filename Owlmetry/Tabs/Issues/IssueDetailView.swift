@@ -89,7 +89,7 @@ struct IssueDetailView: View {
   private var infoItems: [InfoGrid.Item] {
     [
       .init(label: "App", value: app?.name ?? "—"),
-      .init(label: "Source", value: currentIssue.source ?? "—"),
+      .init(label: "Source", value: currentIssue.sourceModule ?? "—"),
       .init(label: "Occurrences", value: "\(currentIssue.occurrenceCount)"),
       .init(label: "Unique Users", value: "\(currentIssue.uniqueUserCount)"),
       .init(label: "First Seen", value: RelativeDate.string(from: currentIssue.firstSeenAt)),
