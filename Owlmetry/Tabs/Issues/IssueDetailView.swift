@@ -253,7 +253,7 @@ struct IssueDetailView: View {
           HStack {
             Image(systemName: "paperclip")
             VStack(alignment: .leading) {
-              Text(attachment.filename).font(.footnote)
+              Text(attachment.originalFilename).font(.footnote)
               Text(attachment.contentType ?? "—").font(.caption2).foregroundStyle(.secondary)
             }
             Spacer()

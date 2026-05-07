@@ -44,7 +44,7 @@ struct IssueComment: Codable, Identifiable, Equatable, Hashable {
 
 struct IssueAttachment: Codable, Identifiable, Equatable, Hashable {
   let id: String
-  let filename: String
+  let originalFilename: String
   let contentType: String?
   let sizeBytes: Int?
   let createdAt: String
