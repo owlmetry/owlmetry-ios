@@ -110,12 +110,9 @@ final class DashboardViewModel: ObservableObject {
   private func refreshSparklinesIfNeeded(teamId: String, projectId: String?, dataMode: DataMode) async {
     let scope = "\(teamId)|\(projectId ?? "-")|\(dataMode.rawValue)"
     let scopeChanged = scope != lastSparklineScope
-    let isStale: Bool
-    if let last = lastSparklineLoadAt {
-      isStale = Date().timeIntervalSince(last) > Self.sparklineMaxAgeSeconds
-    } else {
-      isStale = true
-    }
+    let isStale = lastSparklineLoadAt.map {
+      Date().timeIntervalSince($0) > Self.sparklineMaxAgeSeconds
+    } ?? true
     guard scopeChanged || isStale else { return }
 
     async let events = fetchSparkline(.events, teamId: teamId, projectId: projectId, dataMode: dataMode)
