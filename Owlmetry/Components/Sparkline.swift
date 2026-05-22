@@ -5,8 +5,10 @@ import SwiftUI
 /// is already the magnitude anchor). Mirrors the web's
 /// `apps/web/src/components/charts/sparkline.tsx` edge cases:
 ///
-/// - Empty array → render nothing.
-/// - All zeros → render nothing (a flat line at 0 reads as "trending down").
+/// - Empty array → blank (transparent fill of the assigned frame so the
+///   surrounding card layout stays the same height as cards that DO render
+///   a line).
+/// - All zeros → same blank (a flat line at 0 reads as "trending down").
 /// - All equal (non-zero) → flat line at vertical center.
 /// - Single value → centered dot.
 struct Sparkline: View {
@@ -15,7 +17,7 @@ struct Sparkline: View {
 
   var body: some View {
     if values.isEmpty || values.allSatisfy({ $0 == 0 }) {
-      EmptyView()
+      Color.clear
     } else if values.count == 1 {
       GeometryReader { geo in
         Circle()

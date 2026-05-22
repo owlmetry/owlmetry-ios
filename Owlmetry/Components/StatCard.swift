@@ -7,13 +7,18 @@ struct StatCard: View {
   var secondary: String? = nil
   var delta: Int? = nil
   var isLoading: Bool = false
-  /// When non-nil, a small sparkline is rendered at the bottom of the card.
-  /// An empty array reserves the slot (keeps card height stable on cards
-  /// that *will* eventually have data) without drawing anything.
+  /// Sparkline series. `nil` or empty renders a transparent slot of the
+  /// same height as a drawn chart, so every card on the dashboard stays
+  /// uniformly tall regardless of which row it lands on.
   var sparklineValues: [Double]? = nil
 
+  private static let sparklineSlotHeight: CGFloat = 42
+
   var body: some View {
-    VStack(alignment: .leading, spacing: 14) {
+    // VStack `spacing: 0` so we can hand-pick the gaps: 14pt between header
+    // and value (matches the old default), but only 1pt between value and
+    // chart — chart cards want every spare pixel for vertical resolution.
+    VStack(alignment: .leading, spacing: 0) {
       HStack(alignment: .top) {
         Text(label.uppercased())
           .font(.system(size: 10, weight: .semibold))
@@ -51,16 +56,19 @@ struct StatCard: View {
       }
       .frame(height: 42, alignment: .leading)
       .frame(maxWidth: .infinity, alignment: .leading)
-      if let sparklineValues {
-        Sparkline(values: sparklineValues)
-          .frame(height: 22)
-          .frame(maxWidth: .infinity, alignment: .leading)
-      }
+      .padding(.top, 14)
+      // Sparkline slot is always present (transparent when empty) so cards
+      // share an identical intrinsic height — the grid never has to stretch
+      // chartless cards to match chart-bearing siblings. Zero bottom padding
+      // lets the chart's y-axis floor sit on the card's bottom border.
+      Sparkline(values: sparklineValues ?? [])
+        .frame(height: Self.sparklineSlotHeight)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.top, 1)
     }
     .frame(maxWidth: .infinity, alignment: .leading)
     .padding(.horizontal, 16)
     .padding(.top, 16)
-    .padding(.bottom, sparklineValues == nil ? 16 : 10)
     .background(
       RoundedRectangle(cornerRadius: 14, style: .continuous)
         .fill(Theme.cardBackground)
