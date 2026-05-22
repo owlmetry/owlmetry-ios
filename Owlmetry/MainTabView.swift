@@ -73,6 +73,9 @@ struct MainTabView: View {
           .navigationDestination(for: RatingsListNavRoute.self) { _ in
             RatingsView()
           }
+          .navigationDestination(for: QuestionnairesListNavRoute.self) { _ in
+            QuestionnairesListView()
+          }
           .navigationDestination(for: FeedbackDeepLinkRoute.self) { route in
             FeedbackDetailLoaderView(projectId: route.projectId, feedbackId: route.id)
           }
@@ -127,6 +130,10 @@ struct MainTabView: View {
       selection = .feedback
       feedbackPath = NavigationPath()
       feedbackPath.append(RatingsListNavRoute())
+    case .questionnairesList:
+      selection = .feedback
+      feedbackPath = NavigationPath()
+      feedbackPath.append(QuestionnairesListNavRoute())
     case .usersList:
       selection = .users
     case .insights:

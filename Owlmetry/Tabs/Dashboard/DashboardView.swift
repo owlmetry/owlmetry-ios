@@ -28,7 +28,8 @@ struct DashboardView: View {
                 value: card.value,
                 secondary: card.secondary,
                 delta: card.delta,
-                isLoading: card.isLoading
+                isLoading: card.isLoading,
+                sparklineValues: card.sparklineValues
               )
             }
             .buttonStyle(.plain)
@@ -133,7 +134,8 @@ struct DashboardView: View {
         systemImage: "scroll",
         value: format(viewModel.eventsCount),
         isLoading: viewModel.eventsCount == nil,
-        deepLink: .usersList
+        deepLink: .usersList,
+        sparklineValues: viewModel.eventsSpark
       ),
       CardData(
         id: "users_24h",
@@ -141,7 +143,8 @@ struct DashboardView: View {
         systemImage: "person.crop.circle.badge.magnifyingglass",
         value: format(viewModel.uniqueUsers),
         isLoading: viewModel.uniqueUsers == nil,
-        deepLink: .usersList
+        deepLink: .usersList,
+        sparklineValues: viewModel.usersSpark
       ),
       CardData(
         id: "sessions_24h",
@@ -149,7 +152,8 @@ struct DashboardView: View {
         systemImage: "point.3.connected.trianglepath.dotted",
         value: format(viewModel.uniqueSessions),
         isLoading: viewModel.uniqueSessions == nil,
-        deepLink: .usersList
+        deepLink: .usersList,
+        sparklineValues: viewModel.sessionsSpark
       ),
       CardData(
         id: "metrics_24h",
@@ -158,7 +162,8 @@ struct DashboardView: View {
         value: metricsValue,
         secondary: metricsPercent,
         isLoading: viewModel.metricsCompletedCount == nil,
-        deepLink: .insights
+        deepLink: .insights,
+        sparklineValues: viewModel.metricsSpark
       ),
       CardData(
         id: "funnels_24h",
@@ -167,7 +172,25 @@ struct DashboardView: View {
         value: funnelsValue,
         secondary: funnelsPercent,
         isLoading: viewModel.funnelsCompletedCount == nil,
-        deepLink: .insights
+        deepLink: .insights,
+        sparklineValues: viewModel.funnelsSpark
+      ),
+      CardData(
+        id: "new_feedback",
+        label: "New Feedback",
+        systemImage: "bubble.left",
+        value: format(viewModel.newFeedbackCount),
+        isLoading: viewModel.newFeedbackCount == nil,
+        deepLink: .feedbackList(projectId: nil)
+      ),
+      CardData(
+        id: "responses_24h",
+        label: "Responses · 24h",
+        systemImage: "list.clipboard",
+        value: format(viewModel.questionnaireResponsesCount),
+        isLoading: viewModel.questionnaireResponsesCount == nil,
+        deepLink: .questionnairesList,
+        sparklineValues: viewModel.responsesSpark
       ),
       CardData(
         id: "reviews",
@@ -260,5 +283,6 @@ struct DashboardView: View {
     var delta: Int? = nil
     let isLoading: Bool
     let deepLink: DeepLink
+    var sparklineValues: [Double]? = nil
   }
 }

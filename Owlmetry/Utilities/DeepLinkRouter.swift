@@ -12,6 +12,7 @@ enum DeepLink: Equatable {
   case feedbackList(projectId: String?)
   case reviewsList
   case ratingsList
+  case questionnairesList
   case usersList
   case insights
   case notifications

@@ -48,6 +48,19 @@ struct FeedbackHubView: View {
           }
         }
         .buttonStyle(.plain)
+
+        NavigationLink(value: QuestionnairesListNavRoute()) {
+          NavigableCard(accent: .purple) {
+            Label("Questionnaires", systemImage: "list.clipboard")
+              .font(.headline)
+              .foregroundStyle(.primary)
+            Text("In-app surveys, NPS, and structured user feedback.")
+              .font(.footnote)
+              .foregroundStyle(.secondary)
+              .fixedSize(horizontal: false, vertical: true)
+          }
+        }
+        .buttonStyle(.plain)
       }
       .padding(.horizontal, 16)
       .padding(.vertical, 12)

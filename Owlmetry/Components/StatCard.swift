@@ -7,6 +7,10 @@ struct StatCard: View {
   var secondary: String? = nil
   var delta: Int? = nil
   var isLoading: Bool = false
+  /// When non-nil, a small sparkline is rendered at the bottom of the card.
+  /// An empty array reserves the slot (keeps card height stable on cards
+  /// that *will* eventually have data) without drawing anything.
+  var sparklineValues: [Double]? = nil
 
   var body: some View {
     VStack(alignment: .leading, spacing: 14) {
@@ -47,10 +51,16 @@ struct StatCard: View {
       }
       .frame(height: 42, alignment: .leading)
       .frame(maxWidth: .infinity, alignment: .leading)
+      if let sparklineValues {
+        Sparkline(values: sparklineValues)
+          .frame(height: 22)
+          .frame(maxWidth: .infinity, alignment: .leading)
+      }
     }
     .frame(maxWidth: .infinity, alignment: .leading)
     .padding(.horizontal, 16)
-    .padding(.vertical, 16)
+    .padding(.top, 16)
+    .padding(.bottom, sparklineValues == nil ? 16 : 10)
     .background(
       RoundedRectangle(cornerRadius: 14, style: .continuous)
         .fill(Theme.cardBackground)
