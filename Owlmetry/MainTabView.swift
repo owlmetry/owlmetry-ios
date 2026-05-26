@@ -76,6 +76,16 @@ struct MainTabView: View {
           .navigationDestination(for: QuestionnairesListNavRoute.self) { _ in
             QuestionnairesListView()
           }
+          .navigationDestination(for: QuestionnaireDetailNavRoute.self) { route in
+            QuestionnaireDetailView(projectId: route.projectId, questionnaireId: route.questionnaireId)
+          }
+          .navigationDestination(for: QuestionnaireResponseDetailNavRoute.self) { route in
+            QuestionnaireResponseDetailLoaderView(
+              projectId: route.projectId,
+              questionnaireId: route.questionnaireId,
+              responseId: route.responseId
+            )
+          }
           .navigationDestination(for: FeedbackDeepLinkRoute.self) { route in
             FeedbackDetailLoaderView(projectId: route.projectId, feedbackId: route.id)
           }
