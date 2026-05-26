@@ -87,7 +87,7 @@ struct IssueDetailView: View {
   }
 
   private var infoItems: [InfoGrid.Item] {
-    [
+    var items: [InfoGrid.Item] = [
       .init(label: "App", value: app?.name ?? "—"),
       .init(label: "Source", value: currentIssue.sourceModule ?? "—"),
       .init(label: "Occurrences", value: "\(currentIssue.occurrenceCount)"),
@@ -97,6 +97,10 @@ struct IssueDetailView: View {
       .init(label: "First Version", value: currentIssue.firstSeenAppVersion ?? "—", monospaced: true),
       .init(label: "Last Version", value: currentIssue.lastSeenAppVersion ?? "—", monospaced: true)
     ]
+    if let resolvedVersion = currentIssue.resolvedAtVersion, !resolvedVersion.isEmpty {
+      items.append(.init(label: "Resolved In", value: "v\(resolvedVersion)", monospaced: true))
+    }
+    return items
   }
 
   private var commentsSection: some View {
