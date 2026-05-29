@@ -23,5 +23,13 @@ struct RootView: View {
         OnboardingView()
       }
     }
+    .onOpenURL { url in
+      // Widget taps arrive as owlmetry://dashboard/<section>. Reuse the same
+      // router the notification deep links use; `host + path` reconstructs the
+      // "dashboard/<section>" string DeepLink.parse expects.
+      guard url.scheme == "owlmetry" else { return }
+      let raw = (url.host ?? "") + url.path
+      DeepLinkRouter.shared.handle(raw)
+    }
   }
 }

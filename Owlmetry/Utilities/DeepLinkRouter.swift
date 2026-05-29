@@ -36,6 +36,16 @@ enum DeepLink: Equatable {
         return .feedbackList(projectId: projectId)
       case "notifications":
         return .notifications
+      case "reviews":
+        return .reviewsList
+      case "ratings":
+        return .ratingsList
+      case "questionnaires":
+        return .questionnairesList
+      case "users":
+        return .usersList
+      case "insights":
+        return .insights
       default:
         break
       }

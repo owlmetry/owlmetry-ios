@@ -8,16 +8,53 @@
 
 /* Begin PBXBuildFile section */
 		BEEF001122334455667788CC /* Owlmetry in Frameworks */ = {isa = PBXBuildFile; productRef = BEEF001122334455667788BB /* Owlmetry */; };
+		DDDDEE000000000000000017 /* Owlmetry in Frameworks */ = {isa = PBXBuildFile; productRef = DDDDEE000000000000000016 /* Owlmetry */; };
+		DDDDEE00000000000000001B /* OwlmetryWidgetsExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = DDDDEE000000000000000001 /* OwlmetryWidgetsExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		DDDDEE000000000000000018 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9688ECBA2F9B99CB00C8D00B /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = DDDDEE000000000000000010;
+			remoteInfo = OwlmetryWidgetsExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		DDDDEE00000000000000001A /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				DDDDEE00000000000000001B /* OwlmetryWidgetsExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		9688ECC22F9B99CB00C8D00B /* Owlmetry.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Owlmetry.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DDDDEE000000000000000001 /* OwlmetryWidgetsExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = OwlmetryWidgetsExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		9688ECC42F9B99CB00C8D00B /* Owlmetry */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = Owlmetry;
+			sourceTree = "<group>";
+		};
+		5A6DED0000000000000000A1 /* OwlmetryShared */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = OwlmetryShared;
+			sourceTree = "<group>";
+		};
+		5A6DED0000000000000000B1 /* OwlmetryWidgets */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = OwlmetryWidgets;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -31,6 +68,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		DDDDEE000000000000000015 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DDDDEE000000000000000017 /* Owlmetry in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -38,6 +83,8 @@
 			isa = PBXGroup;
 			children = (
 				9688ECC42F9B99CB00C8D00B /* Owlmetry */,
+				5A6DED0000000000000000A1 /* OwlmetryShared */,
+				5A6DED0000000000000000B1 /* OwlmetryWidgets */,
 				9688ECC32F9B99CB00C8D00B /* Products */,
 			);
 			sourceTree = "<group>";
@@ -46,6 +93,7 @@
 			isa = PBXGroup;
 			children = (
 				9688ECC22F9B99CB00C8D00B /* Owlmetry.app */,
+				DDDDEE000000000000000001 /* OwlmetryWidgetsExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -60,13 +108,16 @@
 				9688ECBE2F9B99CB00C8D00B /* Sources */,
 				9688ECBF2F9B99CB00C8D00B /* Frameworks */,
 				9688ECC02F9B99CB00C8D00B /* Resources */,
+				DDDDEE00000000000000001A /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				DDDDEE000000000000000019 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				9688ECC42F9B99CB00C8D00B /* Owlmetry */,
+				5A6DED0000000000000000A1 /* OwlmetryShared */,
 			);
 			name = OwlmetryApp;
 			packageProductDependencies = (
@@ -75,6 +126,29 @@
 			productName = OwlmetryApp;
 			productReference = 9688ECC22F9B99CB00C8D00B /* Owlmetry.app */;
 			productType = "com.apple.product-type.application";
+		};
+		DDDDEE000000000000000010 /* OwlmetryWidgetsExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DDDDEE000000000000000011 /* Build configuration list for PBXNativeTarget "OwlmetryWidgetsExtension" */;
+			buildPhases = (
+				DDDDEE000000000000000014 /* Sources */,
+				DDDDEE000000000000000015 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				5A6DED0000000000000000B1 /* OwlmetryWidgets */,
+				5A6DED0000000000000000A1 /* OwlmetryShared */,
+			);
+			name = OwlmetryWidgetsExtension;
+			packageProductDependencies = (
+				DDDDEE000000000000000016 /* Owlmetry */,
+			);
+			productName = OwlmetryWidgetsExtension;
+			productReference = DDDDEE000000000000000001 /* OwlmetryWidgetsExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -87,6 +161,9 @@
 				LastUpgradeCheck = 2640;
 				TargetAttributes = {
 					9688ECC12F9B99CB00C8D00B = {
+						CreatedOnToolsVersion = 26.4.1;
+					};
+					DDDDEE000000000000000010 = {
 						CreatedOnToolsVersion = 26.4.1;
 					};
 				};
@@ -109,6 +186,7 @@
 			projectRoot = "";
 			targets = (
 				9688ECC12F9B99CB00C8D00B /* OwlmetryApp */,
+				DDDDEE000000000000000010 /* OwlmetryWidgetsExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -131,7 +209,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		DDDDEE000000000000000014 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		DDDDEE000000000000000019 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = DDDDEE000000000000000010 /* OwlmetryWidgetsExtension */;
+			targetProxy = DDDDEE000000000000000018 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		9688ECCB2F9B99CC00C8D00B /* Debug */ = {
@@ -264,6 +357,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = OwlmetryInfo.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Owlmetry;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
@@ -314,6 +408,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = OwlmetryInfo.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Owlmetry;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
@@ -350,6 +445,86 @@
 			};
 			name = Release;
 		};
+		DDDDEE000000000000000012 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = OwlmetryWidgets/OwlmetryWidgets.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 8SY2WR6FV5;
+				ENABLE_PREVIEWS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = OwlmetryWidgetsInfo.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Owlmetry;
+				IPHONEOS_DEPLOYMENT_TARGET = 18;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.Owlmetry.widgets;
+				PRODUCT_MODULE_NAME = OwlmetryWidgetsExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = auto;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		DDDDEE000000000000000013 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = OwlmetryWidgets/OwlmetryWidgets.Release.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 8SY2WR6FV5;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = OwlmetryWidgetsInfo.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Owlmetry;
+				IPHONEOS_DEPLOYMENT_TARGET = 18;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.Owlmetry.widgets;
+				PRODUCT_MODULE_NAME = OwlmetryWidgetsExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = auto;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -371,6 +546,15 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		DDDDEE000000000000000011 /* Build configuration list for PBXNativeTarget "OwlmetryWidgetsExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DDDDEE000000000000000012 /* Debug */,
+				DDDDEE000000000000000013 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
@@ -386,6 +570,11 @@
 
 /* Begin XCSwiftPackageProductDependency section */
 		BEEF001122334455667788BB /* Owlmetry */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BEEF001122334455667788AA /* XCRemoteSwiftPackageReference "owlmetry-swift" */;
+			productName = Owlmetry;
+		};
+		DDDDEE000000000000000016 /* Owlmetry */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = BEEF001122334455667788AA /* XCRemoteSwiftPackageReference "owlmetry-swift" */;
 			productName = Owlmetry;

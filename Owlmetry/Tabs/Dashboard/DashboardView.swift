@@ -17,19 +17,20 @@ struct DashboardView: View {
       VStack(alignment: .leading, spacing: 12) {
         lastUpdatedLabel
         LazyVGrid(columns: columns, spacing: 12) {
-          ForEach(cards) { card in
+          ForEach(orderedMetrics, id: \.self) { metric in
+            let card = cardData(for: metric)
             Button {
               Haptics.play(.light)
-              DeepLinkRouter.shared.pendingDeepLink = card.deepLink
+              DeepLinkRouter.shared.pendingDeepLink = deepLink(for: metric)
             } label: {
               StatCard(
-                label: card.label,
-                systemImage: card.systemImage,
+                label: metric.label,
+                systemImage: metric.systemImage,
                 value: card.value,
                 secondary: card.secondary,
                 delta: card.delta,
                 isLoading: card.isLoading,
-                sparklineValues: card.sparklineValues
+                sparklineValues: metric.hasSparkline ? card.sparkline : nil
               )
             }
             .buttonStyle(.plain)
@@ -118,151 +119,45 @@ struct DashboardView: View {
     return "Updated \(d)d ago"
   }
 
-  private var cards: [CardData] {
-    [
-      CardData(
-        id: "open_issues",
-        label: "Open Issues",
-        systemImage: "ladybug",
-        value: format(viewModel.openIssuesCount),
-        isLoading: viewModel.openIssuesCount == nil,
-        deepLink: .issuesList(projectId: nil)
-      ),
-      CardData(
-        id: "events_24h",
-        label: "Events · 24h",
-        systemImage: "scroll",
-        value: format(viewModel.eventsCount),
-        isLoading: viewModel.eventsCount == nil,
-        deepLink: .usersList,
-        sparklineValues: viewModel.eventsSpark
-      ),
-      CardData(
-        id: "users_24h",
-        label: "Users · 24h",
-        systemImage: "person.crop.circle.badge.magnifyingglass",
-        value: format(viewModel.uniqueUsers),
-        isLoading: viewModel.uniqueUsers == nil,
-        deepLink: .usersList,
-        sparklineValues: viewModel.usersSpark
-      ),
-      CardData(
-        id: "sessions_24h",
-        label: "Sessions · 24h",
-        systemImage: "point.3.connected.trianglepath.dotted",
-        value: format(viewModel.uniqueSessions),
-        isLoading: viewModel.uniqueSessions == nil,
-        deepLink: .usersList,
-        sparklineValues: viewModel.sessionsSpark
-      ),
-      CardData(
-        id: "metrics_24h",
-        label: "Metrics · 24h",
-        systemImage: "checkmark.circle",
-        value: metricsValue,
-        secondary: metricsPercent,
-        isLoading: viewModel.metricsCompletedCount == nil,
-        deepLink: .insights,
-        sparklineValues: viewModel.metricsSpark
-      ),
-      CardData(
-        id: "funnels_24h",
-        label: "Funnels · 24h",
-        systemImage: "line.3.horizontal.decrease.circle",
-        value: funnelsValue,
-        secondary: funnelsPercent,
-        isLoading: viewModel.funnelsCompletedCount == nil,
-        deepLink: .insights,
-        sparklineValues: viewModel.funnelsSpark
-      ),
-      CardData(
-        id: "new_feedback",
-        label: "New Feedback",
-        systemImage: "bubble.left",
-        value: format(viewModel.newFeedbackCount),
-        isLoading: viewModel.newFeedbackCount == nil,
-        deepLink: .feedbackList(projectId: nil)
-      ),
-      CardData(
-        id: "responses_24h",
-        label: "Responses · 24h",
-        systemImage: "list.clipboard",
-        value: format(viewModel.questionnaireResponsesCount),
-        isLoading: viewModel.questionnaireResponsesCount == nil,
-        deepLink: .questionnairesList,
-        sparklineValues: viewModel.responsesSpark
-      ),
-      CardData(
-        id: "reviews",
-        label: "Reviews",
-        systemImage: "star.bubble",
-        value: format(viewModel.reviewsCount),
-        delta: viewModel.reviewsDelta,
-        isLoading: viewModel.reviewsCount == nil,
-        deepLink: .reviewsList
-      ),
-      CardData(
-        id: "avg_rating",
-        label: "Avg Rating",
-        systemImage: "star",
-        value: avgRatingValue,
-        secondary: avgRatingSecondary,
-        delta: ratingSummaryForScope?.delta,
-        isLoading: false,
-        deepLink: .ratingsList
-      )
-    ]
+  // Dashboard card order (matches the web + iOS dashboard layout).
+  private let orderedMetrics: [DashboardMetric] = [
+    .openIssues, .events, .users, .sessions, .metrics, .funnels,
+    .feedback, .responses, .reviews, .avgRating,
+  ]
+
+  /// The rendered value for a card. Network metrics come from the VM snapshot;
+  /// Avg Rating is computed locally from already-loaded, project-scoped apps
+  /// (no extra fetch, updates live as apps load).
+  private func cardData(for metric: DashboardMetric) -> (value: String, secondary: String?, delta: Int?, sparkline: [Double], isLoading: Bool) {
+    if metric == .avgRating {
+      let v = avgRatingValue
+      return (v.value, v.secondary, v.delta, [], false)
+    }
+    let v = viewModel.value(for: metric)
+    return (v.value, v.secondary, v.delta, v.sparkline, viewModel.isLoading(metric))
   }
 
-  private var ratingSummaryForScope: (avg: Double, total: Int, delta: Int?)? {
+  /// Avg Rating uses the in-memory apps the app already loaded, scoped to the
+  /// selected project — no service call, unlike the other (fetched) cards.
+  private var avgRatingValue: MetricValue {
     let scopedApps = appState.apps.filter {
       appState.selectedProjectId == nil || $0.projectId == appState.selectedProjectId
     }
-    return ratingSummary(for: scopedApps)
+    return DashboardSnapshotLoader.avgRatingValue(scopedApps)
   }
 
-  private var avgRatingValue: String {
-    guard let summary = ratingSummaryForScope else { return "—" }
-    return String(format: "★ %.2f", summary.avg)
-  }
-
-  private var avgRatingSecondary: String? {
-    guard let summary = ratingSummaryForScope else { return nil }
-    return summary.total.formatted(.number)
-  }
-
-  private var funnelsValue: String {
-    guard let completed = viewModel.funnelsCompletedCount else { return "—" }
-    let started = viewModel.funnelsStartedCount ?? 0
-    return "\(format(completed))/\(format(started))"
-  }
-
-  private var funnelsPercent: String? {
-    guard let completed = viewModel.funnelsCompletedCount,
-      let started = viewModel.funnelsStartedCount,
-      started > 0
-    else { return nil }
-    let pct = Int((Double(completed) / Double(started) * 100).rounded())
-    return "\(pct)%"
-  }
-
-  private var metricsValue: String {
-    guard let completed = viewModel.metricsCompletedCount else { return "—" }
-    let total = completed + (viewModel.metricsFailedCount ?? 0)
-    return "\(format(completed))/\(format(total))"
-  }
-
-  private var metricsPercent: String? {
-    guard let completed = viewModel.metricsCompletedCount else { return nil }
-    let total = completed + (viewModel.metricsFailedCount ?? 0)
-    guard total > 0 else { return nil }
-    let pct = Int((Double(completed) / Double(total) * 100).rounded())
-    return "\(pct)%"
-  }
-
-  private func format(_ value: Int?) -> String {
-    guard let value else { return "—" }
-    return value.formatted(.number)
+  // The dashboard's deep links keep their richer project-aware forms; the
+  // shared `DashboardMetric.deepLinkPath` (string form) is only for widget URLs.
+  private func deepLink(for metric: DashboardMetric) -> DeepLink {
+    switch metric {
+    case .openIssues: return .issuesList(projectId: nil)
+    case .events, .users, .sessions: return .usersList
+    case .metrics, .funnels: return .insights
+    case .feedback: return .feedbackList(projectId: nil)
+    case .responses: return .questionnairesList
+    case .reviews: return .reviewsList
+    case .avgRating: return .ratingsList
+    }
   }
 
   private func reload() async {
@@ -272,17 +167,5 @@ struct DashboardView: View {
       projectId: appState.selectedProjectId,
       dataMode: appState.dataMode
     )
-  }
-
-  private struct CardData: Identifiable {
-    let id: String
-    let label: String
-    let systemImage: String
-    let value: String
-    var secondary: String? = nil
-    var delta: Int? = nil
-    let isLoading: Bool
-    let deepLink: DeepLink
-    var sparklineValues: [Double]? = nil
   }
 }

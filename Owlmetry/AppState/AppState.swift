@@ -1,6 +1,7 @@
 import Combine
 import Foundation
 import Owlmetry
+import WidgetKit
 
 @MainActor
 final class AppState: ObservableObject {
@@ -36,6 +37,7 @@ final class AppState: ObservableObject {
     } else {
       currentTeam = nil
       selectedProjectId = nil
+      syncWidgetContext()
     }
   }
 
@@ -47,6 +49,7 @@ final class AppState: ObservableObject {
     } else {
       selectedProjectId = nil
     }
+    syncWidgetContext()
   }
 
   func setSelectedProject(_ id: String?) {
@@ -64,6 +67,7 @@ final class AppState: ObservableObject {
   func setDataMode(_ mode: DataMode) {
     dataMode = mode
     UserDefaults.standard.set(mode.rawValue, forKey: UserDefaultsKeys.dataMode)
+    syncWidgetContext()
     Owl.info("appstate.data_mode.changed", attributes: ["mode": mode.rawValue])
   }
 
@@ -74,6 +78,15 @@ final class AppState: ObservableObject {
     projectsById = [:]
     apps = []
     loadError = nil
+    syncWidgetContext()
+  }
+
+  /// Mirror the current team + data mode into the shared App Group container so
+  /// the widget extension queries the same scope. Widgets are team-total, so
+  /// only the team id and data mode matter (no project).
+  private func syncWidgetContext() {
+    WidgetSharedStore.writeContext(teamId: currentTeam?.id, dataMode: dataMode)
+    WidgetCenter.shared.reloadAllTimelines()
   }
 
   func loadProjectsAndApps() async {

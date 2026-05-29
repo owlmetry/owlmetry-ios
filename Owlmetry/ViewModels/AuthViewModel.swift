@@ -1,6 +1,7 @@
 import Combine
 import Foundation
 import Owlmetry
+import WidgetKit
 
 @MainActor
 class AuthViewModel: ObservableObject {
@@ -78,6 +79,9 @@ class AuthViewModel: ObservableObject {
       teams = response.teams
       pendingEmail = nil
       Owl.setUser(response.user.id)
+      // Token now lives in the shared Keychain group — refresh widgets so they
+      // flip from the signed-out placeholder to live numbers.
+      WidgetCenter.shared.reloadAllTimelines()
       Owl.info("auth.login.succeeded", screenName: "SignInCode")
     } catch let error as APIError {
       errorMessage = error.errorDescription
@@ -98,6 +102,8 @@ class AuthViewModel: ObservableObject {
     teams = []
     pendingEmail = nil
     errorMessage = nil
+    // Token is gone — widgets should fall back to the signed-out placeholder.
+    WidgetCenter.shared.reloadAllTimelines()
   }
 
   func clearPendingEmail() {
@@ -105,6 +111,10 @@ class AuthViewModel: ObservableObject {
   }
 
   private func restoreSession() {
+    // Move any pre-sharing token into the shared Keychain group before the
+    // first read, so existing users stay signed in (and the widget can read
+    // the token) on the first launch after this update.
+    KeychainService.migrateToSharedGroupIfNeeded()
     guard KeychainService.token() != nil else { return }
     if let userData = UserDefaults.standard.data(forKey: userCacheKey),
        let user = try? JSONDecoder().decode(User.self, from: userData) {
