@@ -9,11 +9,11 @@ extension DashboardMetric {
 }
 
 /// Wraps the shared `StatCard` for widget use, pulling the strings out of a
-/// `MetricValue`. `compact` drives the dense grid variant.
+/// `MetricValue`.
 struct WidgetStatCardView: View {
   let metric: DashboardMetric
   let value: MetricValue
-  var compact: Bool = false
+  var style: StatCardStyle
 
   var body: some View {
     StatCard(
@@ -23,12 +23,12 @@ struct WidgetStatCardView: View {
       secondary: value.secondary,
       delta: value.delta,
       sparklineValues: value.sparkline.isEmpty ? nil : value.sparkline,
-      compact: compact
+      style: style
     )
   }
 }
 
-/// Small / medium single-stat layout — one full-size card.
+/// Small / medium single-stat layout — one borderless card filling the widget.
 struct SingleStatWidgetView: View {
   let entry: DashboardWidgetEntry
 
@@ -36,34 +36,55 @@ struct SingleStatWidgetView: View {
     if !entry.signedIn {
       WidgetSignedOutView()
     } else if let metric = entry.metrics.first {
-      WidgetStatCardView(metric: metric, value: entry.value(for: metric))
+      WidgetStatCardView(metric: metric, value: entry.value(for: metric), style: .widgetSolo)
     } else {
       WidgetSignedOutView()
     }
   }
 }
 
-/// 2-column grid of compact cards — used by both the quad (medium) and the
-/// large widget. Each cell deep-links to its section.
+/// 2-column grid of tile cards — used by both the quad (medium) and the large
+/// widget. Built from nested stacks (not LazyVGrid) so every row gets an exact
+/// equal share of the container height: 6 / 8 / 10 cards all fill the widget
+/// with no clipping or dead space, and each card's chart flexes to fit.
 struct MetricGridWidgetView: View {
   let entry: DashboardWidgetEntry
 
-  private let columns = [
-    GridItem(.flexible(), spacing: 8),
-    GridItem(.flexible(), spacing: 8),
-  ]
+  private let columns = 2
+  private let spacing: CGFloat = 8
+
+  private var rows: [[DashboardMetric]] {
+    stride(from: 0, to: entry.metrics.count, by: columns).map {
+      Array(entry.metrics[$0..<min($0 + columns, entry.metrics.count)])
+    }
+  }
 
   var body: some View {
     if !entry.signedIn {
       WidgetSignedOutView()
     } else {
-      LazyVGrid(columns: columns, spacing: 8) {
-        ForEach(entry.metrics, id: \.self) { metric in
-          Link(destination: metric.widgetURL) {
-            WidgetStatCardView(metric: metric, value: entry.value(for: metric), compact: true)
+      // Equal-height rows via maxHeight:.infinity on each row — SwiftUI divides
+      // the free space evenly, so the grid fills the widget for any card count.
+      VStack(spacing: spacing) {
+        ForEach(Array(rows.enumerated()), id: \.offset) { _, row in
+          HStack(spacing: spacing) {
+            ForEach(row, id: \.self) { metric in
+              Link(destination: metric.widgetURL) {
+                WidgetStatCardView(metric: metric, value: entry.value(for: metric), style: .widgetTile)
+                  .frame(maxWidth: .infinity, maxHeight: .infinity)
+              }
+            }
+            // Pad a trailing single-card row so it doesn't stretch full width.
+            if row.count < columns {
+              ForEach(0..<(columns - row.count), id: \.self) { _ in
+                Color.clear.frame(maxWidth: .infinity, maxHeight: .infinity)
+              }
+            }
           }
+          .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
       }
+      .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
   }
 }

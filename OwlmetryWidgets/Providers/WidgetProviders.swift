@@ -85,11 +85,11 @@ struct LargeProvider: AppIntentTimelineProvider {
   }
 
   func snapshot(for configuration: LargeConfigurationIntent, in context: Context) async -> DashboardWidgetEntry {
-    await WidgetDataLoader.entry(for: configuration.preset.metrics, includeSparklines: false)
+    await WidgetDataLoader.entry(for: configuration.preset.metrics, includeSparklines: true)
   }
 
   func timeline(for configuration: LargeConfigurationIntent, in context: Context) async -> Timeline<DashboardWidgetEntry> {
-    let entry = await WidgetDataLoader.entry(for: configuration.preset.metrics, includeSparklines: false)
+    let entry = await WidgetDataLoader.entry(for: configuration.preset.metrics, includeSparklines: true)
     return Timeline(entries: [entry], policy: .after(WidgetRefresh.nextDate()))
   }
 }
