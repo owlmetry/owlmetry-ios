@@ -43,6 +43,11 @@ struct APIClient {
     e.keyEncodingStrategy = .convertToSnakeCase
     return e
   }()
+  /// For bodies whose JSON keys are already the exact wire form and must NOT be
+  /// snake-cased — e.g. preferences PATCHes where the server JSONB key is
+  /// literally camelCase (`magnitudeWindowHours`). Snake-casing it would produce
+  /// `magnitude_window_hours`, which the server's sanitizer silently drops.
+  private let rawKeyEncoder = JSONEncoder()
   private let decoder: JSONDecoder = {
     let d = JSONDecoder()
     d.keyDecodingStrategy = .convertFromSnakeCase
@@ -61,8 +66,15 @@ struct APIClient {
     try await request(path: path, method: "GET", body: Optional<Empty>.none, query: query)
   }
 
-  func patch<Req: Encodable, Res: Decodable>(_ path: String, body: Req) async throws -> Res {
-    try await request(path: path, method: "PATCH", body: body, query: [:])
+  func patch<Req: Encodable, Res: Decodable>(
+    _ path: String,
+    body: Req,
+    convertKeysToSnakeCase: Bool = true
+  ) async throws -> Res {
+    try await request(
+      path: path, method: "PATCH", body: body, query: [:],
+      convertKeysToSnakeCase: convertKeysToSnakeCase
+    )
   }
 
   func patchNoBody<Res: Decodable>(_ path: String) async throws -> Res {
@@ -83,7 +95,8 @@ struct APIClient {
     path: String,
     method: String,
     body: Req?,
-    query: [String: String?]
+    query: [String: String?],
+    convertKeysToSnakeCase: Bool = true
   ) async throws -> Res {
     let op = Owl.startOperation("api-call", attributes: [
       "method": method,
@@ -105,7 +118,7 @@ struct APIClient {
 
     if let body {
       do {
-        req.httpBody = try encoder.encode(body)
+        req.httpBody = try (convertKeysToSnakeCase ? encoder : rawKeyEncoder).encode(body)
         req.setValue("application/json", forHTTPHeaderField: "Content-Type")
       } catch {
         op.fail(error: "\(error)", attributes: ["kind": "encoding"])

@@ -17,20 +17,41 @@ enum DashboardMetric: String, CaseIterable, Identifiable, Hashable {
 
   var id: String { rawValue }
 
-  var label: String {
+  /// Whether this metric's count is scoped to the magnitude time window (and so
+  /// carries a "· 24h"/"· 7d"/… suffix). The non-windowed cards (open issues,
+  /// feedback, reviews total, avg rating) show an all-time / current value.
+  var isWindowed: Bool {
+    switch self {
+    case .events, .users, .sessions, .metrics, .funnels, .responses: return true
+    case .openIssues, .feedback, .reviews, .avgRating: return false
+    }
+  }
+
+  /// The label without any window suffix.
+  var baseLabel: String {
     switch self {
     case .openIssues: return "Open Issues"
-    case .events: return "Events · 24h"
-    case .users: return "Users · 24h"
-    case .sessions: return "Sessions · 24h"
-    case .metrics: return "Metrics · 24h"
-    case .funnels: return "Funnels · 24h"
+    case .events: return "Events"
+    case .users: return "Users"
+    case .sessions: return "Sessions"
+    case .metrics: return "Metrics"
+    case .funnels: return "Funnels"
     case .feedback: return "New Feedback"
-    case .responses: return "Responses · 24h"
+    case .responses: return "Responses"
     case .reviews: return "Reviews"
     case .avgRating: return "Avg Rating"
     }
   }
+
+  /// Tile label for a given magnitude window, e.g. "Events · 7d". Non-windowed
+  /// metrics ignore `windowHours` and return their `baseLabel`.
+  func label(windowHours: Int) -> String {
+    isWindowed ? "\(baseLabel) · \(MagnitudeWindow.label(windowHours))" : baseLabel
+  }
+
+  /// Convenience for callers without a window context — notably the widget,
+  /// which renders a fixed 24h team-total snapshot.
+  var label: String { label(windowHours: MagnitudeWindow.defaultHours) }
 
   var systemImage: String {
     switch self {

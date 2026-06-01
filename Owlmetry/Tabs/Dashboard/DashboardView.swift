@@ -24,7 +24,7 @@ struct DashboardView: View {
               DeepLinkRouter.shared.pendingDeepLink = deepLink(for: metric)
             } label: {
               StatCard(
-                label: metric.label,
+                label: metric.label(windowHours: appState.magnitudeWindowHours),
                 systemImage: metric.systemImage,
                 value: card.value,
                 secondary: card.secondary,
@@ -91,7 +91,7 @@ struct DashboardView: View {
   private var refreshKey: String {
     let team = appState.currentTeam?.id ?? "-"
     let proj = appState.selectedProjectId ?? "all"
-    return "\(team)|\(proj)|\(appState.dataMode.rawValue)"
+    return "\(team)|\(proj)|\(appState.dataMode.rawValue)|\(appState.magnitudeWindowHours)"
   }
 
   private var lastUpdatedLabel: some View {
@@ -165,7 +165,8 @@ struct DashboardView: View {
     await viewModel.load(
       teamId: teamId,
       projectId: appState.selectedProjectId,
-      dataMode: appState.dataMode
+      dataMode: appState.dataMode,
+      windowHours: appState.magnitudeWindowHours
     )
   }
 }

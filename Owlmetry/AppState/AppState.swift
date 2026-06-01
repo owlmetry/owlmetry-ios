@@ -8,6 +8,10 @@ final class AppState: ObservableObject {
   @Published private(set) var currentTeam: TeamMembership?
   @Published var selectedProjectId: String?
   @Published var dataMode: DataMode = .production
+  /// Dashboard magnitude-tile window (hours). Synced with the web dashboard via
+  /// `users.preferences.ui.dashboard.magnitudeWindowHours`; the `UserDefaults`
+  /// mirror gives an instant/offline value before the server fetch resolves.
+  @Published var magnitudeWindowHours: Int = MagnitudeWindow.defaultHours
   @Published private(set) var projects: [Project] = []
   @Published private(set) var projectsById: [String: Project] = [:]
   @Published private(set) var apps: [AppModel] = []
@@ -16,6 +20,7 @@ final class AppState: ObservableObject {
 
   init() {
     restoreDataMode()
+    restoreMagnitudeWindow()
   }
 
   var selectedProject: Project? {
@@ -39,6 +44,9 @@ final class AppState: ObservableObject {
       selectedProjectId = nil
       syncWidgetContext()
     }
+    // Adopt the server's dashboard window once per session (server wins over the
+    // local mirror on launch/login). Runs after the token is established.
+    Task { await syncMagnitudeWindowFromServer() }
   }
 
   func setCurrentTeam(_ team: TeamMembership, restoreSelection: Bool = true) {
@@ -69,6 +77,47 @@ final class AppState: ObservableObject {
     UserDefaults.standard.set(mode.rawValue, forKey: UserDefaultsKeys.dataMode)
     syncWidgetContext()
     Owl.info("appstate.data_mode.changed", attributes: ["mode": mode.rawValue])
+  }
+
+  /// Set the dashboard magnitude window. Optimistic: updates the published value
+  /// and the local mirror immediately (so the dashboard re-scopes at once and
+  /// the choice survives offline), then persists to the server preferences so it
+  /// syncs with the web dashboard. A failed PATCH keeps the local value — the
+  /// mirror is the source of truth offline and the next launch re-syncs.
+  func setMagnitudeWindow(_ hours: Int) {
+    let resolved = MagnitudeWindow.resolve(hours)
+    magnitudeWindowHours = resolved
+    UserDefaults.standard.set(resolved, forKey: UserDefaultsKeys.magnitudeWindow)
+    Owl.info("appstate.magnitude_window.changed", attributes: ["hours": "\(resolved)"])
+    Task {
+      do {
+        let patch = MagnitudeWindowPatch(
+          preferences: .init(ui: .init(dashboard: .init(magnitudeWindowHours: resolved)))
+        )
+        // Send WITHOUT snake-case conversion — the server JSONB key is literally
+        // `magnitudeWindowHours`; snake-casing it makes the sanitizer drop it.
+        let _: MeEnvelope = try await APIClient.shared.patch(
+          "/v1/auth/me", body: patch, convertKeysToSnakeCase: false
+        )
+      } catch {
+        Owl.error("appstate.magnitude_window.patch_failed", attributes: ["error": "\(error)"])
+      }
+    }
+  }
+
+  /// Adopt the server-side dashboard window if present. Best-effort: a failure
+  /// leaves the local mirror value in place.
+  func syncMagnitudeWindowFromServer() async {
+    do {
+      let me: MeEnvelope = try await APIClient.shared.get("/v1/auth/me")
+      guard let stored = me.user.preferences?.ui?.dashboard?.magnitudeWindowHours else { return }
+      let resolved = MagnitudeWindow.resolve(stored)
+      magnitudeWindowHours = resolved
+      UserDefaults.standard.set(resolved, forKey: UserDefaultsKeys.magnitudeWindow)
+    } catch {
+      if error.isCancellation { return }
+      Owl.error("appstate.magnitude_window.sync_failed", attributes: ["error": "\(error)"])
+    }
   }
 
   func reset() {
@@ -134,4 +183,33 @@ final class AppState: ObservableObject {
       dataMode = mode
     }
   }
+
+  private func restoreMagnitudeWindow() {
+    let stored = UserDefaults.standard.object(forKey: UserDefaultsKeys.magnitudeWindow) as? Int
+    magnitudeWindowHours = MagnitudeWindow.resolve(stored)
+  }
+}
+
+// MARK: - /v1/auth/me preference shapes (dashboard window slice only)
+
+/// Decodes just the `ui.dashboard.magnitudeWindowHours` slice of the auth/me
+/// response — other preference keys are ignored. Decoded with the shared
+/// `.convertFromSnakeCase` decoder, which is a no-op on the already-camelCase
+/// `magnitudeWindowHours` key (no underscores), so it round-trips correctly.
+private struct MeEnvelope: Decodable {
+  let user: UserSlice
+  struct UserSlice: Decodable { let preferences: Prefs? }
+  struct Prefs: Decodable { let ui: UI? }
+  struct UI: Decodable { let dashboard: Dashboard? }
+  struct Dashboard: Decodable { let magnitudeWindowHours: Int? }
+}
+
+/// PATCH body for the dashboard window. Sent with `convertKeysToSnakeCase: false`
+/// so `magnitudeWindowHours` reaches the wire verbatim (the server JSONB key is
+/// camelCase; snake-casing it would make the sanitizer silently drop it).
+private struct MagnitudeWindowPatch: Encodable {
+  let preferences: Prefs
+  struct Prefs: Encodable { let ui: UI }
+  struct UI: Encodable { let dashboard: Dashboard }
+  struct Dashboard: Encodable { let magnitudeWindowHours: Int }
 }

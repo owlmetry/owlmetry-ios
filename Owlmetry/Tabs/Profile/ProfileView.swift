@@ -55,6 +55,22 @@ struct ProfileView: View {
         .labelsHidden()
       }
 
+      Section {
+        Picker("Stat window", selection: Binding(
+          get: { appState.magnitudeWindowHours },
+          set: { appState.setMagnitudeWindow($0) }
+        )) {
+          ForEach(MagnitudeWindow.optionsHours, id: \.self) { hours in
+            Text(MagnitudeWindow.label(hours)).tag(hours)
+          }
+        }
+        .pickerStyle(.menu)
+      } header: {
+        Text("Dashboard")
+      } footer: {
+        Text("Time window for the dashboard count tiles (Events, Users, Sessions, Metrics, Funnels, Responses). Synced with the web dashboard.")
+      }
+
       Section("Feedback") {
         Button {
           showFeedback = true

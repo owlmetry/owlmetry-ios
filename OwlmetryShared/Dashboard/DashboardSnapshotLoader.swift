@@ -20,9 +20,12 @@ enum DashboardSnapshotLoader {
     projectId: String?,
     dataMode: DataMode,
     metrics: Set<DashboardMetric>,
-    includeSparklines: Bool
+    includeSparklines: Bool,
+    windowHours: Int = MagnitudeWindow.defaultHours
   ) async -> DashboardSnapshot {
-    let since = ISODate.isoString(since: 86_400)
+    // Magnitude tiles use the selected window; sparklines stay 30-day (below).
+    // The widget omits `windowHours`, keeping its fixed 24h team-total snapshot.
+    let since = ISODate.isoString(since: TimeInterval(windowHours) * 3_600)
     let wantSpark = { (m: DashboardMetric) in includeSparklines && metrics.contains(m) }
 
     // Count fetches — each helper no-ops to nil when its metric isn't requested.
@@ -99,7 +102,7 @@ enum DashboardSnapshotLoader {
     guard let summary = ratingSummary(for: apps) else { return MetricValue(value: "—") }
     return MetricValue(
       value: String(format: "★ %.2f", summary.avg),
-      secondary: summary.total.formatted(.number),
+      secondary: StatNumberFormat.string(summary.total),
       delta: summary.delta
     )
   }
@@ -160,7 +163,7 @@ enum DashboardSnapshotLoader {
 
   private static func format(_ value: Int?) -> String {
     guard let value else { return "—" }
-    return value.formatted(.number)
+    return StatNumberFormat.string(value)
   }
 
   /// `completed/total` with a percent secondary. Metrics' total adds failures;

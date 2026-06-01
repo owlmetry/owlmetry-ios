@@ -37,8 +37,8 @@ final class DashboardViewModel: ObservableObject {
   private var lastSparklineLoadAt: Date?
   private var lastSparklineScope: String?
 
-  func load(teamId: String, projectId: String?, dataMode: DataMode) async {
-    let scope = "\(teamId)|\(projectId ?? "-")|\(dataMode.rawValue)"
+  func load(teamId: String, projectId: String?, dataMode: DataMode, windowHours: Int) async {
+    let scope = "\(teamId)|\(projectId ?? "-")|\(dataMode.rawValue)|\(windowHours)"
     let includeSparklines = shouldRefreshSparklines(scope: scope)
 
     let snapshot = await DashboardSnapshotLoader.load(
@@ -46,7 +46,8 @@ final class DashboardViewModel: ObservableObject {
       projectId: projectId,
       dataMode: dataMode,
       metrics: Self.fetchedMetrics,
-      includeSparklines: includeSparklines
+      includeSparklines: includeSparklines,
+      windowHours: windowHours
     )
 
     if Task.isCancelled { return }
