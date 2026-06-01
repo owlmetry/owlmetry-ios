@@ -18,12 +18,14 @@ enum WidgetSharedStore {
   private enum Keys {
     static let teamId = "widget:teamId"
     static let dataMode = "widget:dataMode"
+    static let magnitudeWindow = "widget:magnitudeWindow"
     static let baseURLOverride = "widget:baseURLOverride"
   }
 
   /// Widgets are team-scoped (all projects). Persist the current team + data
-  /// mode so the timeline provider resolves the same scope the app shows.
-  static func writeContext(teamId: String?, dataMode: DataMode) {
+  /// mode + dashboard stat window so the timeline provider resolves the same
+  /// scope the app shows.
+  static func writeContext(teamId: String?, dataMode: DataMode, magnitudeWindowHours: Int) {
     guard let suite else { return }
     if let teamId {
       suite.set(teamId, forKey: Keys.teamId)
@@ -31,12 +33,19 @@ enum WidgetSharedStore {
       suite.removeObject(forKey: Keys.teamId)
     }
     suite.set(dataMode.rawValue, forKey: Keys.dataMode)
+    suite.set(magnitudeWindowHours, forKey: Keys.magnitudeWindow)
   }
 
   static var teamId: String? { suite?.string(forKey: Keys.teamId) }
 
   static var dataMode: DataMode {
     suite?.string(forKey: Keys.dataMode).flatMap(DataMode.init(rawValue:)) ?? .production
+  }
+
+  /// The dashboard magnitude window the widget should query + label with.
+  /// Defaults to 24h before the app has written any context.
+  static var magnitudeWindowHours: Int {
+    MagnitudeWindow.resolve(suite?.object(forKey: Keys.magnitudeWindow) as? Int)
   }
 
   /// Mirrors the dev-only API base-URL override so a non-prod widget hits the

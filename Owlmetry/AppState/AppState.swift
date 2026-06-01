@@ -88,6 +88,7 @@ final class AppState: ObservableObject {
     let resolved = MagnitudeWindow.resolve(hours)
     magnitudeWindowHours = resolved
     UserDefaults.standard.set(resolved, forKey: UserDefaultsKeys.magnitudeWindow)
+    syncWidgetContext()  // mirror to the App Group + reload widget timelines
     Owl.info("appstate.magnitude_window.changed", attributes: ["hours": "\(resolved)"])
     Task {
       do {
@@ -112,8 +113,10 @@ final class AppState: ObservableObject {
       let me: MeEnvelope = try await APIClient.shared.get("/v1/auth/me")
       guard let stored = me.user.preferences?.ui?.dashboard?.magnitudeWindowHours else { return }
       let resolved = MagnitudeWindow.resolve(stored)
+      guard resolved != magnitudeWindowHours else { return }
       magnitudeWindowHours = resolved
       UserDefaults.standard.set(resolved, forKey: UserDefaultsKeys.magnitudeWindow)
+      syncWidgetContext()  // server value differed — refresh the widget too
     } catch {
       if error.isCancellation { return }
       Owl.error("appstate.magnitude_window.sync_failed", attributes: ["error": "\(error)"])
@@ -134,7 +137,11 @@ final class AppState: ObservableObject {
   /// the widget extension queries the same scope. Widgets are team-total, so
   /// only the team id and data mode matter (no project).
   private func syncWidgetContext() {
-    WidgetSharedStore.writeContext(teamId: currentTeam?.id, dataMode: dataMode)
+    WidgetSharedStore.writeContext(
+      teamId: currentTeam?.id,
+      dataMode: dataMode,
+      magnitudeWindowHours: magnitudeWindowHours
+    )
     WidgetCenter.shared.reloadAllTimelines()
   }
 

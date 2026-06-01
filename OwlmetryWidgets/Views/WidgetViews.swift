@@ -13,11 +13,12 @@ extension DashboardMetric {
 struct WidgetStatCardView: View {
   let metric: DashboardMetric
   let value: MetricValue
+  var windowHours: Int
   var style: StatCardStyle
 
   var body: some View {
     StatCard(
-      label: metric.label,
+      label: metric.label(windowHours: windowHours),
       systemImage: metric.systemImage,
       value: value.value,
       secondary: value.secondary,
@@ -36,7 +37,7 @@ struct SingleStatWidgetView: View {
     if !entry.signedIn {
       WidgetSignedOutView()
     } else if let metric = entry.metrics.first {
-      WidgetStatCardView(metric: metric, value: entry.value(for: metric), style: .widgetSolo)
+      WidgetStatCardView(metric: metric, value: entry.value(for: metric), windowHours: entry.windowHours, style: .widgetSolo)
     } else {
       WidgetSignedOutView()
     }
@@ -70,7 +71,7 @@ struct MetricGridWidgetView: View {
           HStack(spacing: spacing) {
             ForEach(row, id: \.self) { metric in
               Link(destination: metric.widgetURL) {
-                WidgetStatCardView(metric: metric, value: entry.value(for: metric), style: .widgetTile)
+                WidgetStatCardView(metric: metric, value: entry.value(for: metric), windowHours: entry.windowHours, style: .widgetTile)
                   .frame(maxWidth: .infinity, maxHeight: .infinity)
               }
             }
