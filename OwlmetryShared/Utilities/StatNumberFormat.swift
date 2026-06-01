@@ -9,10 +9,15 @@ import Foundation
 /// - 100,000 and up: abbreviate to a short suffixed form (`408885` → `409k`,
 ///   `1_250_000` → `1.3M`) so headline numbers can't overflow the fixed tile width.
 ///
-/// The 100k threshold matches the point where un-separated numbers start to get
-/// long; `99,999` still renders in full, `100k` and beyond compress.
+/// The default 100k threshold matches the point where un-separated numbers start
+/// to get long; `99,999` still renders in full, `100k` and beyond compress.
+///
+/// `compactThreshold` lowers where the `k` suffix kicks in for space-constrained
+/// spots — notably the Metrics/Funnels completion ratio (`X/Y`), where two full
+/// numbers plus a percent must fit one narrow tile, so it abbreviates from 10k
+/// (`32372/32413` → `32k/32k`).
 enum StatNumberFormat {
-  static func string(_ value: Int) -> String {
+  static func string(_ value: Int, compactThreshold: Int = 100_000) -> String {
     let v = Double(value)
     let magnitude = Swift.abs(v)
 
@@ -20,7 +25,7 @@ enum StatNumberFormat {
     if magnitude >= 999_500_000_000 { return trimUnit(v / 1_000_000_000_000) + "T" }
     if magnitude >= 999_500_000 { return trimUnit(v / 1_000_000_000) + "B" }
     if magnitude >= 999_500 { return trimUnit(v / 1_000_000) + "M" }
-    if magnitude >= 100_000 { return "\(Int((v / 1_000).rounded()))k" }
+    if magnitude >= Double(compactThreshold) { return "\(Int((v / 1_000).rounded()))k" }
 
     return value.formatted(.number)
   }

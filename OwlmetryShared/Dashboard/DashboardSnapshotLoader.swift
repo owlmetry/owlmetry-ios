@@ -180,6 +180,8 @@ enum DashboardSnapshotLoader {
     let percent = total > 0
       ? "\(Int((Double(completed) / Double(total) * 100).rounded()))%"
       : nil
-    return MetricValue(value: "\(format(completed))/\(format(total))", secondary: percent, sparkline: sparkline)
+    // Compact from 10k so two numbers + a percent fit one narrow tile (32k/32k).
+    let ratio = "\(StatNumberFormat.string(completed, compactThreshold: 10_000))/\(StatNumberFormat.string(total, compactThreshold: 10_000))"
+    return MetricValue(value: ratio, secondary: percent, sparkline: sparkline)
   }
 }
