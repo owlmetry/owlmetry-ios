@@ -96,10 +96,16 @@ struct DashboardView: View {
 
   private var lastUpdatedLabel: some View {
     TimelineView(.periodic(from: .now, by: 15)) { context in
-      Text(updatedString(at: context.date))
-        .font(.caption)
-        .foregroundStyle(.secondary)
-        .frame(maxWidth: .infinity, alignment: .leading)
+      HStack(spacing: 6) {
+        Text(updatedString(at: context.date))
+          .font(.caption)
+          .foregroundStyle(.secondary)
+        if viewModel.isRefreshing {
+          ProgressView()
+            .controlSize(.mini)
+        }
+      }
+      .frame(maxWidth: .infinity, alignment: .leading)
     }
   }
 

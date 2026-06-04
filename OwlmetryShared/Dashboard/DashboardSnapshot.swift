@@ -2,7 +2,7 @@ import Foundation
 
 /// One card's rendered values — already formatted into the strings `StatCard`
 /// expects, so the app and the widget display identical text.
-struct MetricValue: Equatable {
+struct MetricValue: Equatable, Codable {
   let value: String          // big number, e.g. "1,234", "12/24", "★ 4.52", or "—"
   let secondary: String?     // percent or count shown next to the value
   let delta: Int?            // change indicator (reviews use 24h new-count)
